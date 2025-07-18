@@ -22,11 +22,10 @@ func Start() {
 	router.GET("/api/init", dbInit)
 
 	// Player routes
-	router.GET("/api/players", getActivePlayers)
-	router.GET("/api/getplayer", getPlayerByName)
-
-	router.POST("/api/addplayer", addPlayer)
-	router.POST("/api/updateplayer", updatePlayer)
+	router.GET("/api/player", getActivePlayers)
+	router.POST("/api/player/add", addPlayer)
+	router.POST("/api/player/update", updatePlayer)
+	router.DELETE("api/player/delete", deletePlayer)
 
 	s := &http.Server{
 		Addr:         port,

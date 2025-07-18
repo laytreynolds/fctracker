@@ -61,7 +61,7 @@ func Init() {
 	}
 }
 
-func GetActivePlayers() []Player {
+func GetActivePlayers() ([]Player, error) {
 	coll := client.Database(db).Collection(players)
 
 	filter := bson.D{{"active", true}}
@@ -75,10 +75,10 @@ func GetActivePlayers() []Player {
 	// Unpacks the cursor into a slice
 	var results []Player
 	if err = cursor.All(context.TODO(), &results); err != nil {
-		panic(err)
+		return results, err
 	}
 
-	return results
+	return results, nil
 	// end find
 }
 
@@ -108,4 +108,30 @@ func UpdatePlayerByID(id string, update map[string]any) (any, error) {
 		return nil, err
 	}
 	return result, nil
+}
+
+func DeletePlayer(id string) error {
+	coll := client.Database(db).Collection(players)
+	objID, err := bson.ObjectIDFromHex(id)
+	if err != nil {
+		return err
+	}
+	filter := bson.D{{"_id", objID}}
+
+	// Check if player exists
+	var result Player
+	err = coll.FindOne(context.TODO(), filter).Decode(&result)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return fmt.Errorf("player not found")
+		}
+		return err
+	}
+
+	// Player exists, proceed to delete
+	_, err = coll.DeleteOne(context.TODO(), filter)
+	if err != nil {
+		return err
+	}
+	return nil
 }

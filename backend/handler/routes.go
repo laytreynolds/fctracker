@@ -9,12 +9,13 @@ import (
 )
 
 func getActivePlayers(c *gin.Context) {
-	players := db.GetActivePlayers()
+	players, err := db.GetActivePlayers()
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{"mesage": "error getting active players", "error": "no players found"})
+	}
 
 	if len(players) == 0 {
-		c.JSON(http.StatusOK, gin.H{
-			"Error": "no players found",
-		})
+		c.JSON(http.StatusOK, gin.H{"mesage": "error getting active players", "error": "no players found"})
 		return
 	}
 
@@ -36,9 +37,7 @@ func addPlayer(c *gin.Context) {
 
 	response, err := db.AddPlayer(name, position, fact, age)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"Error": err,
-		})
+		c.JSON(http.StatusInternalServerError, gin.H{"mesage": "error adding player", "error": err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{
@@ -50,9 +49,7 @@ func updatePlayer(c *gin.Context) {
 	id := c.Query("id")
 
 	if id == "" {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"Error": "missing id query parameter",
-		})
+		c.JSON(http.StatusBadRequest, gin.H{"mesage": "error updating player", "error": "missing id query parameter"})
 		return
 	}
 
@@ -83,40 +80,29 @@ func updatePlayer(c *gin.Context) {
 	}
 
 	if len(update) == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"Error": "no fields to update"})
+		c.JSON(http.StatusBadRequest, gin.H{"mesage": "error updating player", "error": "no fields to update"})
 		return
 	}
 
 	// Call a db function to update the player
 	result, err := db.UpdatePlayerByID(id, update)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"Error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "error updating player", "error": err.Error()})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"result": result})
 }
 
-func getPlayerByName(c *gin.Context) {
-	name := c.Query("name")
+func deletePlayer(c *gin.Context) {
+	id := c.Query("id")
 
-	if name == "" {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"Error": "missing name query parameter",
-		})
-		return
-	}
-
-	player, err := db.GetPlayerByName(name)
-
+	err := db.DeletePlayer(id)
 	if err != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"Error": "no players found",
-		})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "error deleting player", "error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"players": player,
-	})
+	c.JSON(http.StatusOK, gin.H{"message": "player deleted"})
+
 }
