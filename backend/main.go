@@ -14,7 +14,7 @@ func main() {
 
 	db.Connect()
 
-	handler.Start()
+	go handler.Start()
 
 	<-signals
 }
