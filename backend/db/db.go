@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
+
+	"math/rand"
 
 	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/v2/bson"
@@ -20,6 +23,7 @@ var (
 const (
 	db      = "fctracker"
 	players = "players"
+	teams   = "teams"
 )
 
 func Connect() {
@@ -134,4 +138,69 @@ func DeletePlayer(id string) error {
 		return err
 	}
 	return nil
+}
+
+func SeedPlayers() error {
+	collPlayers := client.Database(db).Collection(players)
+	collTeams := client.Database(db).Collection(teams)
+
+	// Create a team
+	team := Team{
+		Name:    "Seeded FC",
+		Coach:   "Coach Random",
+		Players: []bson.ObjectID{},
+		Founded: "2024",
+	}
+	teamResult, err := collTeams.InsertOne(context.TODO(), team)
+	if err != nil {
+		return err
+	}
+	teamID := teamResult.InsertedID.(bson.ObjectID)
+
+	names := []string{"Alex", "Jamie", "Chris", "Taylor", "Jordan", "Morgan", "Casey", "Riley", "Drew", "Sam"}
+	positions := []string{"GK", "CB", "LB", "RB", "CM", "CDM", "CAM", "LW", "RW", "ST"}
+	funFacts := []string{"Loves pizza", "Can juggle", "Fastest runner", "Team joker", "Plays guitar", "Chess champion", "Speaks 3 languages", "Has a pet snake", "Never late", "Wears lucky socks"}
+
+	var playerIDs []bson.ObjectID
+	for i := 0; i < 10; i++ {
+		age := rand.Intn(10) + 18 // 18-27
+		player := Player{
+			Name:          names[i%len(names)],
+			Age:           strconv.Itoa(age),
+			Position:      positions[i%len(positions)],
+			FunFact:       funFacts[i%len(funFacts)],
+			Goals:         rand.Intn(20),
+			Assists:       rand.Intn(10),
+			GamesPlayed:   rand.Intn(30) + 1,
+			ManOfTheMatch: rand.Intn(5),
+			Active:        true,
+			TeamID:        teamID,
+		}
+		res, err := collPlayers.InsertOne(context.TODO(), player)
+		if err != nil {
+			return err
+		}
+		playerIDs = append(playerIDs, res.InsertedID.(bson.ObjectID))
+	}
+
+	// Optionally update the team with the player IDs
+	_, err = collTeams.UpdateByID(context.TODO(), teamID, bson.M{"$set": bson.M{"players": playerIDs}})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func AddTeam(name, coach, founded string) (Team, error) {
+	coll := client.Database(db).Collection(teams)
+
+	team := newTeam(name, coach, founded)
+
+	_, err := coll.InsertOne(context.TODO(), team)
+	if err != nil {
+		return team, err
+	}
+
+	return team, nil
 }

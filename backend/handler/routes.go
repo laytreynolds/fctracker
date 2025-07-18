@@ -19,13 +19,11 @@ func getActivePlayers(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"players": players,
-	})
+	c.JSON(http.StatusOK, gin.H{"players": players, "error": ""})
 }
 
-func dbInit(c *gin.Context) {
-	db.Init()
+func seed(c *gin.Context) {
+	db.SeedPlayers()
 }
 
 func addPlayer(c *gin.Context) {
@@ -40,9 +38,7 @@ func addPlayer(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"mesage": "error adding player", "error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"player": response,
-	})
+	c.JSON(http.StatusOK, gin.H{"player": response, "error": ""})
 }
 
 func updatePlayer(c *gin.Context) {
@@ -91,7 +87,7 @@ func updatePlayer(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"result": result})
+	c.JSON(http.StatusOK, gin.H{"result": result, "error": ""})
 }
 
 func deletePlayer(c *gin.Context) {
@@ -103,6 +99,20 @@ func deletePlayer(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "player deleted"})
+	c.JSON(http.StatusOK, gin.H{"message": "player deleted", "error": ""})
 
+}
+
+func addTeam(c *gin.Context) {
+	name := c.Query("name")
+	coach := c.Query("coach")
+	founded := c.Query("founded")
+
+	team, err := db.AddTeam(name, coach, founded)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "error adding team", "error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "team added", "team": team, "error": ""})
 }

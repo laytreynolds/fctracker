@@ -19,13 +19,15 @@ var (
 
 func Start() {
 
-	router.GET("/api/init", dbInit)
+	router.POST("/api/seed", seed)
 
 	// Player routes
 	router.GET("/api/player", getActivePlayers)
 	router.POST("/api/player/add", addPlayer)
 	router.POST("/api/player/update", updatePlayer)
 	router.DELETE("api/player/delete", deletePlayer)
+
+	router.POST("/api/team/add", addTeam)
 
 	s := &http.Server{
 		Addr:         port,
