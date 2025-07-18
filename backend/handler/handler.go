@@ -19,9 +19,14 @@ var (
 
 func Start() {
 
-	router.GET("/api/players", getActivePlayers)
 	router.GET("/api/init", dbInit)
+
+	// Player routes
+	router.GET("/api/players", getActivePlayers)
+	router.GET("/api/getplayer", getPlayerByName)
+
 	router.POST("/api/addplayer", addPlayer)
+	router.POST("/api/updateplayer", updatePlayer)
 
 	s := &http.Server{
 		Addr:         port,
@@ -31,6 +36,7 @@ func Start() {
 	}
 
 	// Start the server
+
 	go func() {
 		if err := s.ListenAndServe(); err != http.ErrServerClosed {
 			log.Fatal(err)

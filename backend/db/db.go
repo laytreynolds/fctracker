@@ -12,14 +12,14 @@ import (
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
-const (
-	db      = "fctracker"
-	players = "players"
-)
-
 var (
 	URI    string
 	client *mongo.Client
+)
+
+const (
+	db      = "fctracker"
+	players = "players"
 )
 
 func Connect() {
@@ -92,4 +92,20 @@ func AddPlayer(name, position, fact, age string) (Player, error) {
 	}
 
 	return player, nil
+}
+
+func UpdatePlayerByID(id string, update map[string]any) (any, error) {
+	coll := client.Database(db).Collection(players)
+	objID, err := bson.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, err
+	}
+	filter := bson.D{{"_id", objID}}
+	updateDoc := bson.M{"$set": update}
+
+	result, err := coll.UpdateOne(context.TODO(), filter, updateDoc)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
