@@ -1,12 +1,20 @@
-import { add, format } from 'date-fns'
-import './App.css'
+import { Routes, Route } from 'react-router-dom';
+import Layout from "@/pages/Laytout";
+import PlayersPage from "@/pages/PlayersPage";
 
-function App() {
-  return (
-    <>
-    Hello World - Today's Date: {format(add(new Date(), { days: 0 }), 'dd/MM/yyyy')}
-    </>
-  )
+interface AppProps {
+  darkMode: boolean;
+  setDarkMode: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export default App
+function App({ darkMode, setDarkMode} : AppProps) {
+  return (
+    <Routes>
+      <Route path="/" element={<Layout darkMode={darkMode} setDarkMode={setDarkMode} />}>
+      <Route path="/players" element={<PlayersPage />}/>
+      </Route>
+    </Routes>
+  );
+}
+
+export default App;

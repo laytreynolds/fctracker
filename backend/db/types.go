@@ -6,6 +6,10 @@ import (
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
+const (
+	format = "2006-01-02T15:04:05.000Z"
+)
+
 type Player struct {
 	Name          string        `bson:"name"`
 	Age           string        `bson:"age"`
@@ -25,6 +29,7 @@ type Team struct {
 	Coach   string          `bson:"coach"`
 	Players []bson.ObjectID `bson:"players"` // List of Player IDs
 	Founded string          `bson:"founded"`
+	Created string          `bson:"created"`
 	// Add more fields as needed
 }
 
@@ -51,7 +56,7 @@ func newPlayer(name, position, funFact, age string) Player {
 		GamesPlayed:   0,    // default
 		ManOfTheMatch: 0,    // default
 		Active:        true, // default
-		Created:       "",
+		Created:       time.Now().Format(format),
 	}
 }
 
@@ -60,5 +65,6 @@ func newTeam(name, coach, founded string) Team {
 		Name:    name,
 		Coach:   coach,
 		Founded: founded,
+		Created: time.Now().Format(format),
 	}
 }

@@ -38,6 +38,9 @@ func addPlayer(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"mesage": "error adding player", "error": err.Error()})
 		return
 	}
+	c.Header("Access-Control-Allow-Origin", "http://localhost:5173")
+	c.Header("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+	c.Header("Access-Control-Allow-Headers", "Content-Type")
 	c.JSON(http.StatusOK, gin.H{"player": response, "error": ""})
 }
 
