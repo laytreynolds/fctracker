@@ -11,6 +11,7 @@ const (
 )
 
 type Player struct {
+	ID            bson.ObjectID `bson:"_id,omitempty"`
 	Name          string        `bson:"name"`
 	Age           string        `bson:"age"`
 	Position      string        `bson:"position"`
@@ -34,14 +35,15 @@ type Team struct {
 	Created string          `bson:"created"`
 }
 
-type Match struct {
-	Date          time.Time       `bson:"date"`
-	HomeTeam      string          `bson:"home_team"`
-	AwayTeam      string          `bson:"away_team"`
-	HomeScore     int             `bson:"home_score"`
-	AwayScore     int             `bson:"away_score"`
-	ManOfTheMatch bson.ObjectID   `bson:"man_of_the_match,omitempty"`
-	Lineup        []bson.ObjectID `bson:"lineup"`
+type Fixture struct {
+	Date              string          `bson:"date"`
+	HomeTeam          string          `bson:"home_team"`
+	AwayTeam          string          `bson:"away_team"`
+	HomeScore         string          `bson:"home_score"`
+	AwayScore         string          `bson:"away_score"`
+	ManOfTheMatch     bson.ObjectID   `bson:"man_of_the_match,omitempty"`
+	Lineup            []bson.ObjectID `bson:"lineup"`
+	ManOfTheMatchName string          `bson:"man_of_the_match_name"`
 }
 
 // In db/types.go or db/db.go
@@ -68,5 +70,16 @@ func newTeam(name, coach, founded string) Team {
 		Coach:   coach,
 		Founded: founded,
 		Created: time.Now().Format(format),
+	}
+}
+
+func newFixture(date, homeTeam, awayTeam, homeScore, awayScore string, manOfTheMatch bson.ObjectID) Fixture {
+	return Fixture{
+		Date:          date,
+		HomeTeam:      homeTeam,
+		AwayTeam:      awayTeam,
+		HomeScore:     homeScore,
+		AwayScore:     awayScore,
+		ManOfTheMatch: manOfTheMatch,
 	}
 }

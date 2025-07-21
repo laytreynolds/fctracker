@@ -21,9 +21,10 @@ var (
 )
 
 const (
-	db      = "fctracker"
-	players = "players"
-	teams   = "teams"
+	db       = "fctracker"
+	players  = "players"
+	teams    = "teams"
+	fixtures = "fixtures"
 )
 
 func Connect() {
@@ -269,4 +270,57 @@ func GetTeamByName(name string) (Team, error) {
 		return result, err
 	}
 	return result, nil
+}
+
+func AddFixture(date, homeTeam, awayTeam, homeScore, awayScore, manOfTheMatch string) (Fixture, error) {
+	var result Fixture
+
+	coll := client.Database(db).Collection(fixtures)
+
+	motmId, err := bson.ObjectIDFromHex(manOfTheMatch)
+	if err != nil {
+		return result, err
+	}
+
+	result = newFixture(date, homeTeam, awayTeam, homeScore, awayScore, motmId)
+
+	_, err = coll.InsertOne(context.TODO(), result)
+	if err != nil {
+		return result, err
+	}
+
+	return result, nil
+}
+
+func GetFixtures() ([]Fixture, error) {
+	coll := client.Database(db).Collection(fixtures)
+
+	pipeline := mongo.Pipeline{
+		{{"$lookup", bson.D{
+			{"from", "players"},
+			{"localField", "man_of_the_match"},
+			{"foreignField", "_id"},
+			{"as", "motmDetails"},
+		}}},
+		{{"$addFields", bson.D{
+			{"man_of_the_match_name", bson.D{
+				{"$arrayElemAt", bson.A{"$motmDetails.name", 0}},
+			}},
+		}}},
+		{{"$project", bson.D{
+			{"motmDetails", 0},
+		}}},
+	}
+
+	cursor, err := coll.Aggregate(context.TODO(), pipeline)
+	if err != nil {
+		return nil, err
+	}
+
+	var results []Fixture
+	if err = cursor.All(context.TODO(), &results); err != nil {
+		return nil, err
+	}
+
+	return results, nil
 }

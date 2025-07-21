@@ -36,6 +36,9 @@ func Start() {
 	router.GET("/api/team/getidbyname", getTeamIdByName)
 	router.GET("/api/team/getall", getAllTeams)
 
+	router.POST("/api/fixture/add", addFixture)
+	router.GET("/api/fixture/getall", getFixtures)
+
 	s := &http.Server{
 		Addr:         port,
 		Handler:      router,

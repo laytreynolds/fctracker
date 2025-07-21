@@ -165,3 +165,30 @@ func getAllTeams(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"teams": teams, "error": ""})
 }
+
+func addFixture(c *gin.Context) {
+	date := c.Query("date")
+	homeTeam := c.Query("homeTeam")
+	awayTeam := c.Query("awayTeam")
+	homeScore := c.Query("homeScore")
+	awayScore := c.Query("awayScore")
+	manOfMatch := c.Query("manOfTheMatch")
+
+	fixture, err := db.AddFixture(date, homeTeam, awayTeam, homeScore, awayScore, manOfMatch)
+	if err != nil {
+		if err != nil {
+			c.JSON(http.StatusOK, gin.H{"mesage": "error adding fixture", "error": err})
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "fixture added", "fixture": fixture, "error": ""})
+}
+
+func getFixtures(c *gin.Context) {
+	fixtures, err := db.GetFixtures()
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{"mesage": "error getting active players", "error": "no players found"})
+	}
+
+	c.JSON(http.StatusOK, gin.H{"fixtures": fixtures, "error": ""})
+}

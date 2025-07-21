@@ -13,7 +13,7 @@ import {
   Typography,
   Stack,
 } from '@mui/material';
-import AddPlayerDialog from './AddPlayerDialog';
+import AddPlayerDialog from '@/components/AddPlayerDialog';
 
 interface Player {
   id: string;
