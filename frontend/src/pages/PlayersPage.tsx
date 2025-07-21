@@ -25,24 +25,13 @@ interface Player {
   age?: number;
   position: string;
   team?: string;
-  fact?: string;
+  funFact?: string;
+  goals: number;
+  assists: number;
 }
 
-const initialPlayers: Player[] = [
-  { id: 1, name: 'Lionel Messi', position: 'Forward', team: 'PSG' },
-  { id: 2, name: 'Cristiano Ronaldo', position: 'Forward', team: 'Al Nassr' },
-  { id: 3, name: 'Kevin De Bruyne', position: 'Midfielder', team: 'Man City' },
-  { id: 4, name: 'Virgil van Dijk', position: 'Defender', team: 'Liverpool' },
-  { id: 5, name: 'Kylian Mbappé', position: 'Forward', team: 'PSG' },
-  { id: 6, name: 'Erling Haaland', position: 'Forward', team: 'Man City' },
-  { id: 7, name: 'Luka Modrić', position: 'Midfielder', team: 'Real Madrid' },
-  { id: 8, name: 'Neymar Jr.', position: 'Forward', team: 'Al Hilal' },
-  { id: 9, name: 'Joshua Kimmich', position: 'Midfielder', team: 'Bayern Munich' },
-  { id: 10, name: 'Jan Oblak', position: 'Goalkeeper', team: 'Atletico Madrid' },
-];
-
 export default function PlayersPage() {
-  const [players, setPlayers] = React.useState<Player[]>(initialPlayers);
+  const [players, setPlayers] = React.useState<Player[]>([]);
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
   const [open, setOpen] = React.useState(false);
@@ -50,8 +39,45 @@ export default function PlayersPage() {
     name: '',
     age: '',
     position: '',
-    fact: '',
+    funFact: '',
+    team: ''
   });
+
+  const fetchPlayers = React.useCallback(async () => {
+    try {
+      const response = await fetch('http://localhost:8080/api/player');
+      if (!response.ok) {
+        throw new Error('error fetching players');
+      }
+      const data = await response.json();
+
+      if (data.error) {
+        alert(`Error from server: ${data.error}`);
+        return;
+      }
+
+      if (Array.isArray(data.players)) {
+        const fetchedPlayers: Player[] = data.players.map((player: { ID: string; Name: string; Age: string; Position: string; FunFact: string; Goals: number; Assists: number; }) => ({
+          id: player.ID ? parseInt(player.ID, 16) : Math.random(), // using a random number as a fallback
+          name: player.Name,
+          age: player.Age ? parseInt(player.Age, 10) : undefined,
+          position: player.Position,
+          funFact: player.FunFact,
+          goals: player.Goals,
+          assists: player.Assists
+        }));
+        setPlayers(fetchedPlayers);
+      }
+    } catch (error) {
+      console.error("Failed to fetch players:", error);
+      alert('Failed to fetch players. Check the console for more details.');
+    }
+  }, []);
+
+  React.useEffect(() => {
+    fetchPlayers();
+  }, [fetchPlayers]);
+
 
   const handleChangePage = (event: unknown, newPage: number) => {
     setPage(newPage);
@@ -65,7 +91,7 @@ export default function PlayersPage() {
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
     setOpen(false);
-    setForm({ name: '', age: '', position: '', fact: '' });
+    setForm({ name: '', age: '', position: '', funFact: '', team: '' });
   };
 
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -77,7 +103,8 @@ export default function PlayersPage() {
       name: form.name,
       age: form.age,
       position: form.position,
-      fact: form.fact,
+      funFact: form.funFact,
+      team: form.team
     });
 
     try {
@@ -87,24 +114,10 @@ export default function PlayersPage() {
       if (!response.ok) {
         throw new Error('Failed to add player');
       }
-      // Optionally, you can get the new player from the response and add it to state
-      // const newPlayer = await response.json();
-      // setPlayers([...players, newPlayer]);
-      // For now, just add locally as before:
-      const newId = players.length + 1;
-      setPlayers([
-        ...players,
-        {
-          id: newId,
-          name: form.name,
-          age: form.age ? parseInt(form.age, 10) : undefined,
-          position: form.position,
-          fact: form.fact,
-        },
-      ]);
       handleClose();
+      fetchPlayers(); // Refetch players to show the new one
     } catch (error) {
-      alert('Error adding player: ' + error);
+      alert('Error adding player: ' + (error as Error).message);
     }
   };
 
@@ -121,21 +134,21 @@ export default function PlayersPage() {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell>ID</TableCell>
                 <TableCell>Name</TableCell>
                 <TableCell>Position</TableCell>
                 <TableCell>Age</TableCell>
-                <TableCell>Fun Fact</TableCell>
+                <TableCell>Goals</TableCell>
+                <TableCell>Assists</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {players.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((player) => (
                 <TableRow key={player.id}>
-                  <TableCell>{player.id}</TableCell>
                   <TableCell>{player.name}</TableCell>
                   <TableCell>{player.position}</TableCell>
                   <TableCell>{player.age ?? '-'}</TableCell>
-                  <TableCell>{player.fact ?? '-'}</TableCell>
+                  <TableCell>{player.goals ?? '-'}</TableCell>
+                  <TableCell>{player.assists ?? '-'}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -181,8 +194,8 @@ export default function PlayersPage() {
             />
             <TextField
               label="Fun Fact"
-              name="fact"
-              value={form.fact}
+              name="funFact"
+              value={form.funFact}
               onChange={handleFormChange}
               fullWidth
             />

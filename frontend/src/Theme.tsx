@@ -9,7 +9,15 @@ import { ThemeProvider, createTheme, CssBaseline } from "@mui/material"
 import { BrowserRouter } from 'react-router-dom'
 
 export default function Theme() {
-    const [darkMode, setDarkMode] = React.useState(false);
+    const [darkMode, setDarkMode] = React.useState(() => {
+      const savedMode = localStorage.getItem("darkMode");
+      return savedMode === "true" ? true : false;
+    });
+
+    React.useEffect(() => {
+      localStorage.setItem("darkMode", String(darkMode));
+    }, [darkMode]);
+
     const theme = React.useMemo(
       () => createTheme({ palette: { mode: darkMode ? "dark" : "light" } }),
       [darkMode]

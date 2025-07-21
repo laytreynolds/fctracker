@@ -1,6 +1,6 @@
 // src/pages/HomePage.tsx
 import React from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, Link, useLocation } from 'react-router-dom';
 
 import {
   Box, CssBaseline, AppBar, Toolbar, Typography, IconButton, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText,
@@ -19,9 +19,9 @@ import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 const drawerWidth = 240;
 
 const navItems = [
-  { text: 'Home', icon: <HomeIcon /> },
-  { text: 'Fixtures', icon: <SportsSoccerIcon /> },
-  { text: 'Players', icon: <PeopleIcon /> },
+  { text: 'Home', icon: <HomeIcon />, link: "/"  },
+  { text: 'Fixtures', icon: <SportsSoccerIcon />, link: "/fixtures" },
+  { text: 'Players', icon: <PeopleIcon />, link: "/players" },
 ];
 
 interface LayoutProps {
@@ -31,6 +31,7 @@ interface LayoutProps {
 
 export default function Layout({ darkMode, setDarkMode }: LayoutProps) {
   const theme = useTheme();
+  const location = useLocation();
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const isMenuOpen = Boolean(anchorEl);
@@ -48,9 +49,9 @@ export default function Layout({ darkMode, setDarkMode }: LayoutProps) {
       </Toolbar>
       <Divider />
       <List>
-        {navItems.map(({ text, icon }) => (
+        {navItems.map(({ text, icon, link }) => (
           <ListItem key={text} disablePadding>
-            <ListItemButton selected={text === 'Home'}>
+            <ListItemButton component={Link} to={link} selected={location.pathname === link}>
               <ListItemIcon sx={{ color: 'inherit' }}>{icon}</ListItemIcon>
               <ListItemText primary={text} />
             </ListItemButton>
