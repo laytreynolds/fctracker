@@ -55,42 +55,51 @@ func Connect() {
 	fmt.Println("connected to MongoDB...")
 }
 
-func Init() {
-	coll := client.Database(db).Collection(players)
-	newPlayer := newPlayer("Layton", "CB", "Speaks weird", "27")
-
-	_, err := coll.InsertOne(context.TODO(), newPlayer)
-	if err != nil {
-		panic(err)
-	}
-}
-
 func GetActivePlayers() ([]Player, error) {
 	coll := client.Database(db).Collection(players)
 
-	filter := bson.D{{"active", true}}
-
-	// Retrieves documents that match the query filter
-	cursor, err := coll.Find(context.TODO(), filter)
-	if err != nil {
-		panic(err)
+	pipeline := mongo.Pipeline{
+		{{"$match", bson.D{{"active", true}}}},
+		{{"$lookup", bson.D{
+			{"from", "teams"},
+			{"localField", "team_id"},
+			{"foreignField", "_id"},
+			{"as", "teamDetails"},
+		}}},
+		{{"$unwind", "$teamDetails"}},
+		{{"$addFields", bson.D{
+			{"team_name", "$teamDetails.name"},
+		}}},
+		{{"$project", bson.D{
+			{"teamDetails", 0},
+		}}},
 	}
 
-	// Unpacks the cursor into a slice
+	cursor, err := coll.Aggregate(context.TODO(), pipeline)
+	if err != nil {
+		return nil, err
+	}
+
 	var results []Player
 	if err = cursor.All(context.TODO(), &results); err != nil {
-		return results, err
+		return nil, err
 	}
 
 	return results, nil
-	// end find
 }
 
-func AddPlayer(name, position, fact, age string) (Player, error) {
+func AddPlayer(name, position, fact, age, teamID string) (Player, error) {
 	coll := client.Database(db).Collection(players)
-	player := newPlayer(name, position, fact, age)
 
-	_, err := coll.InsertOne(context.TODO(), player)
+	// Get team from name
+	objID, err := bson.ObjectIDFromHex(teamID)
+	if err != nil {
+		return Player{}, err
+	}
+
+	player := newPlayer(name, position, fact, age, objID)
+
+	_, err = coll.InsertOne(context.TODO(), player)
 	if err != nil {
 		return player, err
 	}
@@ -203,4 +212,61 @@ func AddTeam(name, coach, founded string) (Team, error) {
 	}
 
 	return team, nil
+}
+
+func GetTeamById(id string) (Team, error) {
+	var result Team
+
+	coll := client.Database(db).Collection(teams)
+	objID, err := bson.ObjectIDFromHex(id)
+	if err != nil {
+		return result, err
+	}
+	filter := bson.D{{"_id", objID}}
+
+	// Check if team exists
+	err = coll.FindOne(context.TODO(), filter).Decode(&result)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return result, fmt.Errorf("player not found")
+		}
+		return result, err
+	}
+	return result, nil
+}
+
+func GetAllTeams() ([]Team, error) {
+	coll := client.Database(db).Collection(teams)
+
+	filter := bson.D{}
+
+	cursor, err := coll.Find(context.TODO(), filter)
+	if err != nil {
+		return nil, err
+	}
+
+	var results []Team
+	if err = cursor.All(context.TODO(), &results); err != nil {
+		return nil, err
+	}
+
+	return results, nil
+}
+
+func GetTeamByName(name string) (Team, error) {
+	var result Team
+
+	coll := client.Database(db).Collection(teams)
+
+	filter := bson.D{{"name", name}}
+
+	// Check if team exists
+	err := coll.FindOne(context.TODO(), filter).Decode(&result)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return result, fmt.Errorf("team not found")
+		}
+		return result, err
+	}
+	return result, nil
 }

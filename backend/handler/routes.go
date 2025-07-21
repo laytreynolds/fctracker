@@ -32,6 +32,9 @@ func Start() {
 	router.DELETE("api/player/delete", deletePlayer)
 
 	router.POST("/api/team/add", addTeam)
+	router.GET("/api/team/getbyid", getTeamById)
+	router.GET("/api/team/getidbyname", getTeamIdByName)
+	router.GET("/api/team/getall", getAllTeams)
 
 	s := &http.Server{
 		Addr:         port,

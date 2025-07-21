@@ -22,15 +22,16 @@ type Player struct {
 	Active        bool          `bson:"active"`
 	Created       string        `bson:"created"`
 	TeamID        bson.ObjectID `bson:"team_id"`
+	TeamName      string        `bson:"team_name,omitempty"`
 }
 
 type Team struct {
+	ID      bson.ObjectID   `bson:"_id,omitempty"`
 	Name    string          `bson:"name"`
 	Coach   string          `bson:"coach"`
 	Players []bson.ObjectID `bson:"players"` // List of Player IDs
 	Founded string          `bson:"founded"`
 	Created string          `bson:"created"`
-	// Add more fields as needed
 }
 
 type Match struct {
@@ -44,7 +45,7 @@ type Match struct {
 }
 
 // In db/types.go or db/db.go
-func newPlayer(name, position, funFact, age string) Player {
+func newPlayer(name, position, funFact, age string, teamId bson.ObjectID) Player {
 	return Player{
 		Name:     name,
 		Age:      age,
@@ -57,6 +58,7 @@ func newPlayer(name, position, funFact, age string) Player {
 		ManOfTheMatch: 0,    // default
 		Active:        true, // default
 		Created:       time.Now().Format(format),
+		TeamID:        teamId,
 	}
 }
 

@@ -29,6 +29,14 @@ interface LayoutProps {
   setDarkMode: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
+function getDate() {
+  const today = new Date();
+  const month = today.getMonth() + 1;
+  const year = today.getFullYear();
+  const date = today.getDate();
+  return `${date}/${month}/${year}`;
+}
+
 export default function Layout({ darkMode, setDarkMode }: LayoutProps) {
   const theme = useTheme();
   const location = useLocation();
@@ -41,6 +49,9 @@ export default function Layout({ darkMode, setDarkMode }: LayoutProps) {
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => setAnchorEl(event.currentTarget);
   const handleMenuClose = () => setAnchorEl(null);
   const handleDarkModeToggle = () => setDarkMode((prev: boolean) => !prev);
+
+  const [currentDate, setCurrentDate] = React.useState(getDate());
+
 
   const drawer = (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', bgcolor: 'background.paper' }}>
@@ -90,11 +101,8 @@ export default function Layout({ darkMode, setDarkMode }: LayoutProps) {
           <Box sx={{ flexGrow: 1 }} />
           {/* Date and Notification */}
           <Button startIcon={<CalendarTodayIcon />} sx={{ color: 'text.secondary', mr: 2 }}>
-            Apr 17, 2023
+          {currentDate}
           </Button>
-          <IconButton color="inherit" sx={{ mr: 2 }}>
-            <NotificationsNoneIcon />
-          </IconButton>
           {/* User Avatar and Menu */}
           <IconButton color="inherit" onClick={handleMenuOpen} sx={{ mr: 2 }}>
             <Avatar src="/user-avatar.jpg" />

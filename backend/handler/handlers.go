@@ -29,13 +29,20 @@ func getActivePlayers(c *gin.Context) {
 }
 
 func addPlayer(c *gin.Context) {
-
 	name := c.Query("name")
 	age := c.Query("age")
 	position := c.Query("position")
 	fact := c.Query("fact")
+	teamName := c.Query("team")
 
-	response, err := db.AddPlayer(name, position, fact, age)
+	// Get Team ID from name
+	team, err := db.GetTeamByName(teamName)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "error finding team", "error": err.Error()})
+		return
+	}
+
+	response, err := db.AddPlayer(name, position, fact, age, team.ID.Hex())
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"mesage": "error adding player", "error": err.Error()})
 		return
@@ -119,4 +126,42 @@ func addTeam(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "team added", "team": team, "error": ""})
+}
+
+func getTeamById(c *gin.Context) {
+	id := c.Query("id")
+
+	team, err := db.GetTeamById(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "error getting team", "error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "team found", "team": team, "error": ""})
+}
+
+func getTeamIdByName(c *gin.Context) {
+	name := c.Query("name")
+
+	team, err := db.GetTeamByName(name)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "error getting team", "error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "team found", "team_id": team.ID.Hex(), "error": ""})
+}
+
+func getAllTeams(c *gin.Context) {
+	teams, err := db.GetAllTeams()
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{"mesage": "error getting teams", "error": "no teams found"})
+	}
+
+	if len(teams) == 0 {
+		c.JSON(http.StatusOK, gin.H{"mesage": "error getting teams", "error": "no teams found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"teams": teams, "error": ""})
 }

@@ -12,22 +12,18 @@ import {
   Button,
   Typography,
   Stack,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
 } from '@mui/material';
+import AddPlayerDialog from './AddPlayerDialog';
 
 interface Player {
-  id: number;
+  id: string;
   name: string;
   age?: number;
   position: string;
-  team?: string;
   funFact?: string;
   goals: number;
   assists: number;
+  teamName: string;
 }
 
 export default function PlayersPage() {
@@ -35,13 +31,6 @@ export default function PlayersPage() {
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
   const [open, setOpen] = React.useState(false);
-  const [form, setForm] = React.useState({
-    name: '',
-    age: '',
-    position: '',
-    funFact: '',
-    team: ''
-  });
 
   const fetchPlayers = React.useCallback(async () => {
     try {
@@ -57,19 +46,31 @@ export default function PlayersPage() {
       }
 
       if (Array.isArray(data.players)) {
-        const fetchedPlayers: Player[] = data.players.map((player: { ID: string; Name: string; Age: string; Position: string; FunFact: string; Goals: number; Assists: number; }) => ({
-          id: player.ID ? parseInt(player.ID, 16) : Math.random(), // using a random number as a fallback
-          name: player.Name,
-          age: player.Age ? parseInt(player.Age, 10) : undefined,
-          position: player.Position,
-          funFact: player.FunFact,
-          goals: player.Goals,
-          assists: player.Assists
-        }));
+        const fetchedPlayers: Player[] = data.players.map(
+          (player: {
+            ID: string;
+            TeamName: string;
+            Name: string;
+            Age: string;
+            Position: string;
+            FunFact: string;
+            Goals: number;
+            Assists: number;
+          }) => ({
+            id: player.ID,
+            teamName: player.TeamName,
+            name: player.Name,
+            age: player.Age ? parseInt(player.Age, 10) : undefined,
+            position: player.Position,
+            funFact: player.FunFact,
+            goals: player.Goals,
+            assists: player.Assists,
+          })
+        );
         setPlayers(fetchedPlayers);
       }
     } catch (error) {
-      console.error("Failed to fetch players:", error);
+      console.error('Failed to fetch players:', error);
       alert('Failed to fetch players. Check the console for more details.');
     }
   }, []);
@@ -77,7 +78,6 @@ export default function PlayersPage() {
   React.useEffect(() => {
     fetchPlayers();
   }, [fetchPlayers]);
-
 
   const handleChangePage = (event: unknown, newPage: number) => {
     setPage(newPage);
@@ -89,36 +89,11 @@ export default function PlayersPage() {
   };
 
   const handleOpen = () => setOpen(true);
-  const handleClose = () => {
-    setOpen(false);
-    setForm({ name: '', age: '', position: '', funFact: '', team: '' });
-  };
+  const handleClose = () => setOpen(false);
 
-  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  const handleAddPlayer = async () => {
-    const params = new URLSearchParams({
-      name: form.name,
-      age: form.age,
-      position: form.position,
-      funFact: form.funFact,
-      team: form.team
-    });
-
-    try {
-      const response = await fetch(`http://localhost:8080/api/player/add?${params.toString()}`, {
-        method: 'POST',
-      });
-      if (!response.ok) {
-        throw new Error('Failed to add player');
-      }
-      handleClose();
-      fetchPlayers(); // Refetch players to show the new one
-    } catch (error) {
-      alert('Error adding player: ' + (error as Error).message);
-    }
+  const handleSuccess = () => {
+    handleClose();
+    fetchPlayers();
   };
 
   return (
@@ -134,6 +109,7 @@ export default function PlayersPage() {
           <Table>
             <TableHead>
               <TableRow>
+                <TableCell>Team</TableCell>
                 <TableCell>Name</TableCell>
                 <TableCell>Position</TableCell>
                 <TableCell>Age</TableCell>
@@ -144,6 +120,7 @@ export default function PlayersPage() {
             <TableBody>
               {players.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((player) => (
                 <TableRow key={player.id}>
+                  <TableCell>{player.teamName}</TableCell>
                   <TableCell>{player.name}</TableCell>
                   <TableCell>{player.position}</TableCell>
                   <TableCell>{player.age ?? '-'}</TableCell>
@@ -164,50 +141,7 @@ export default function PlayersPage() {
           rowsPerPageOptions={[5, 10, 25]}
         />
       </Paper>
-      <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>Add Player</DialogTitle>
-        <DialogContent>
-          <Stack spacing={2} sx={{ mt: 1 }}>
-            <TextField
-              label="Name"
-              name="name"
-              value={form.name}
-              onChange={handleFormChange}
-              fullWidth
-              required
-            />
-            <TextField
-              label="Age"
-              name="age"
-              value={form.age}
-              onChange={handleFormChange}
-              type="number"
-              fullWidth
-            />
-            <TextField
-              label="Position"
-              name="position"
-              value={form.position}
-              onChange={handleFormChange}
-              fullWidth
-              required
-            />
-            <TextField
-              label="Fun Fact"
-              name="funFact"
-              value={form.funFact}
-              onChange={handleFormChange}
-              fullWidth
-            />
-          </Stack>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose}>Cancel</Button>
-          <Button onClick={handleAddPlayer} variant="contained" disabled={!form.name || !form.position}>
-            Add
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <AddPlayerDialog open={open} onClose={handleClose} onSuccess={handleSuccess} />
     </Box>
   );
 }
