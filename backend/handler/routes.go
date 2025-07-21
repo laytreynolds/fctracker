@@ -1,121 +1,50 @@
 package handler
 
 import (
+	"log"
 	"net/http"
+	"time"
 
-	"fctracker/db"
-
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
-func getActivePlayers(c *gin.Context) {
-	players, err := db.GetActivePlayers()
-	if err != nil {
-		c.JSON(http.StatusOK, gin.H{"mesage": "error getting active players", "error": "no players found"})
+const (
+	port    = ":8080"
+	timeout = 30 * time.Second
+)
+
+var (
+	router = gin.Default()
+)
+
+func Start() {
+
+	router.Use(cors.Default())
+
+	// init
+	router.POST("/api/seed", seed)
+
+	// Player routes
+	router.GET("/api/player", getActivePlayers)
+	router.POST("/api/player/add", addPlayer)
+	router.POST("/api/player/update", updatePlayer)
+	router.DELETE("api/player/delete", deletePlayer)
+
+	router.POST("/api/team/add", addTeam)
+
+	s := &http.Server{
+		Addr:         port,
+		Handler:      router,
+		ReadTimeout:  timeout,
+		WriteTimeout: timeout,
 	}
 
-	if len(players) == 0 {
-		c.JSON(http.StatusOK, gin.H{"mesage": "error getting active players", "error": "no players found"})
-		return
-	}
+	// Start the server
 
-	c.JSON(http.StatusOK, gin.H{"players": players, "error": ""})
-}
-
-func seed(c *gin.Context) {
-	db.SeedPlayers()
-}
-
-func addPlayer(c *gin.Context) {
-
-	name := c.Query("name")
-	age := c.Query("age")
-	position := c.Query("position")
-	fact := c.Query("fact")
-
-	response, err := db.AddPlayer(name, position, fact, age)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"mesage": "error adding player", "error": err.Error()})
-		return
-	}
-	c.Header("Access-Control-Allow-Origin", "http://localhost:5173")
-	c.Header("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
-	c.Header("Access-Control-Allow-Headers", "Content-Type")
-	c.JSON(http.StatusOK, gin.H{"player": response, "error": ""})
-}
-
-func updatePlayer(c *gin.Context) {
-	id := c.Query("id")
-
-	if id == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"mesage": "error updating player", "error": "missing id query parameter"})
-		return
-	}
-
-	// Get all query params
-	params := c.Request.URL.Query()
-	update := make(map[string]any)
-
-	// List of updatable fields
-	allowed := map[string]bool{
-		"name":             true,
-		"age":              true,
-		"position":         true,
-		"fun_fact":         true,
-		"goals":            true,
-		"assists":          true,
-		"games_played":     true,
-		"man_of_the_match": true,
-		"active":           true,
-	}
-
-	for key, values := range params {
-		if key == "id" {
-			continue // don't update the id
+	go func() {
+		if err := s.ListenAndServe(); err != http.ErrServerClosed {
+			log.Fatal(err)
 		}
-		if allowed[key] && len(values) > 0 {
-			update[key] = values[0]
-		}
-	}
-
-	if len(update) == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"mesage": "error updating player", "error": "no fields to update"})
-		return
-	}
-
-	// Call a db function to update the player
-	result, err := db.UpdatePlayerByID(id, update)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "error updating player", "error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"result": result, "error": ""})
-}
-
-func deletePlayer(c *gin.Context) {
-	id := c.Query("id")
-
-	err := db.DeletePlayer(id)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "error deleting player", "error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "player deleted", "error": ""})
-
-}
-
-func addTeam(c *gin.Context) {
-	name := c.Query("name")
-	coach := c.Query("coach")
-	founded := c.Query("founded")
-
-	team, err := db.AddTeam(name, coach, founded)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "error adding team", "error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "team added", "team": team, "error": ""})
+	}()
 }
