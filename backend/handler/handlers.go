@@ -256,3 +256,21 @@ func addGoalscorerToFixture(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"fixture": updated})
 }
+
+func addAssistToFixture(c *gin.Context) {
+	fixtureID := c.Query("fixtureId")
+	playerID := c.Query("playerId")
+
+	if fixtureID == "" || playerID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Missing fixtureId or playerId"})
+		return
+	}
+
+	updated, err := db.AddAssistToFixture(fixtureID, playerID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"fixture": updated})
+}

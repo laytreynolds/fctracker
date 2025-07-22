@@ -528,3 +528,120 @@ func AddGoalscorerToFixture(fixtureID, playerID string) (Fixture, error) {
 	// Return the updated fixture (refetch as needed)
 	return GetFixtureByID(fixtureID)
 }
+
+// 1. Add assis to fixture
+func AddAssistToFixtureOnly(fixtureID, playerID string) error {
+	collFixtures := client.Database(db).Collection(fixtures)
+	collPlayers := client.Database(db).Collection(players)
+
+	fixtureObjID, err := bson.ObjectIDFromHex(fixtureID)
+	if err != nil {
+		return err
+	}
+	playerObjID, err := bson.ObjectIDFromHex(playerID)
+	if err != nil {
+		return err
+	}
+
+	// Get player name
+	var player Player
+	err = collPlayers.FindOne(context.TODO(), bson.M{"_id": playerObjID}).Decode(&player)
+	if err != nil {
+		return err
+	}
+
+	update := bson.M{
+		"$push": bson.M{
+			"assist_scorers":       playerObjID,
+			"assist_scorers_names": player.Name,
+		},
+	}
+
+	_, err = collFixtures.UpdateOne(
+		context.TODO(),
+		bson.M{"_id": fixtureObjID},
+		update,
+	)
+	return err
+}
+
+// 2. Count player assists
+func CountPlayerAssists(playerObjID bson.ObjectID) (int64, error) {
+	collFixtures := client.Database(db).Collection(fixtures)
+
+	pipeline := mongo.Pipeline{
+		{{"$project", bson.D{
+			{"count", bson.D{
+				{"$size", bson.D{
+					{"$filter", bson.D{
+						{"input", bson.D{{"$ifNull", bson.A{"$assist_scorers", bson.A{}}}}},
+						{"as", "scorer"},
+						{"cond", bson.D{{"$eq", bson.A{"$$scorer", playerObjID}}}},
+					}},
+				}},
+			}},
+		}}},
+		{{"$group", bson.D{
+			{"_id", nil},
+			{"total", bson.D{{"$sum", "$count"}}},
+		}}},
+	}
+
+	cursor, err := collFixtures.Aggregate(context.TODO(), pipeline)
+	if err != nil {
+		return 0, err
+	}
+	defer cursor.Close(context.TODO())
+
+	var result struct {
+		Total int64 `bson:"total"`
+	}
+	if cursor.Next(context.TODO()) {
+		if err := cursor.Decode(&result); err != nil {
+			return 0, err
+		}
+		return result.Total, nil
+	}
+	return 0, nil
+}
+
+// 3. Update player assists field
+func UpdatePlayerAssistsField(playerObjID bson.ObjectID, count int64) error {
+	collPlayers := client.Database(db).Collection(players)
+	_, err := collPlayers.UpdateOne(
+		context.TODO(),
+		bson.M{"_id": playerObjID},
+		bson.M{"$set": bson.M{"assists": count}},
+	)
+	return err
+
+}
+
+func AddAssistToFixture(fixtureID, playerID string) (Fixture, error) {
+	// Add goalscorer to fixture
+	err := AddAssistToFixtureOnly(fixtureID, playerID)
+	if err != nil {
+		return Fixture{}, err
+	}
+
+	// Convert playerID to ObjectID
+	playerObjID, err := bson.ObjectIDFromHex(playerID)
+	if err != nil {
+		return Fixture{}, err
+	}
+
+	// Count assists
+	count, err := CountPlayerAssists(playerObjID)
+	if err != nil {
+		return Fixture{}, err
+	}
+
+	// Update player assists field
+	err = UpdatePlayerAssistsField(playerObjID, count)
+	if err != nil {
+		return Fixture{}, err
+	}
+
+	// Return the updated fixture (refetch as needed)
+	return GetFixtureByID(fixtureID)
+}

@@ -41,6 +41,7 @@ func Start() {
 	router.POST("/api/fixture/add", addFixture)
 	router.GET("/api/fixture/getall", getFixtures)
 	router.POST("/api/fixture/addgoalscorer", addGoalscorerToFixture)
+	router.POST("/api/fixture/addassist", addAssistToFixture)
 	router.GET("/api/fixture/:id", getFixtureByID)
 
 	// Leaderboard
