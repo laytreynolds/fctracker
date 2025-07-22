@@ -43,7 +43,7 @@ onRowsPerPageChange,
   }, [refresh]);
 
   return (       
-     <Box sx={{ mx: 'auto', mt: 2 }}>
+     <Box sx={{ mx: 'auto' }}>
       <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
         <Typography variant="h5">Fixtures</Typography>
         <Button variant="contained" color="primary" onClick={handleOpen}>

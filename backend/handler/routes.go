@@ -25,20 +25,23 @@ func Start() {
 	// init
 	router.POST("/api/seed", seed)
 
-	// Player routes
+	// Player
 	router.GET("/api/player", getActivePlayers)
 	router.POST("/api/player/add", addPlayer)
 	router.POST("/api/player/update", updatePlayer)
 	router.DELETE("api/player/delete", deletePlayer)
 
+	// Teams
 	router.POST("/api/team/add", addTeam)
 	router.GET("/api/team/getbyid", getTeamById)
 	router.GET("/api/team/getidbyname", getTeamIdByName)
 	router.GET("/api/team/getall", getAllTeams)
 
+	// Fixtures
 	router.POST("/api/fixture/add", addFixture)
 	router.GET("/api/fixture/getall", getFixtures)
 
+	// Leaderboard
 	router.GET("/api/leaderboard/goals", leaderboardGoals)
 	router.GET("/api/leaderboard/assists", leaderboardAssists)
 	router.GET("/api/leaderboard/motm", leaderboardMotm)

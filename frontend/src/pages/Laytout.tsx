@@ -4,23 +4,22 @@ import { Outlet, Link, useLocation } from 'react-router-dom';
 
 import {
   Box, CssBaseline, AppBar, Toolbar, Typography, IconButton, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText,
-  Divider, Avatar, Menu, MenuItem, Switch, useTheme, useMediaQuery, Button, TextField, InputAdornment, 
+  Divider, Avatar, Menu, MenuItem, Switch, useTheme, useMediaQuery, Button
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import HomeIcon from '@mui/icons-material/Home';
 import SportsSoccerIcon from '@mui/icons-material/SportsSoccer';
-import PeopleIcon from '@mui/icons-material/People';
-import Brightness4Icon from '@mui/icons-material/Brightness4';
+import PersonIcon from '@mui/icons-material/Person';import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
+import Groups2Icon from '@mui/icons-material/Groups2';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import logo from '@/assets/logo.png';
-
 const drawerWidth = 240;
 
 const navItems = [
   { text: 'Home', icon: <HomeIcon />, link: "/home"  },
   { text: 'Fixtures', icon: <SportsSoccerIcon />, link: "/fixtures" },
-  { text: 'Players', icon: <PeopleIcon />, link: "/players" },
+  { text: 'Players', icon: <PersonIcon />, link: "/players" },
+  { text: 'Teams', icon: <Groups2Icon />, link: "/teams" },
 ];
 interface LayoutProps {
   darkMode: boolean;
