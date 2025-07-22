@@ -50,7 +50,7 @@ onRowsPerPageChange,
           Add Fixture
         </Button>
       </Stack>
-    <Paper sx={{ width: '100%', overflow: 'hidden' }}>
+    <Paper sx={{ width: '100%', overflow: 'hidden', borderRadius: 4 }}>
       <TableContainer>
         <Table>
           <TableHead>

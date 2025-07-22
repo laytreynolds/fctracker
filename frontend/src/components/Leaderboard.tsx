@@ -28,7 +28,7 @@ export default function Leaderboard(){
       justifyContent="center"
           >
 <Grid item size={4}>
-          <Card sx={{ width: '100%' }}>
+          <Card sx={{ width: '100%', borderRadius: 4 }}>
             <CardContent>
               <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>
                 <SportsSoccerIcon color="primary" />
@@ -36,8 +36,14 @@ export default function Leaderboard(){
               </Stack>
               <List dense>
                 {goals.map((player, idx) => (
-                  <ListItem key={player.ID}>
-                    <ListItemText primary={`${idx + 1}. ${player.Name}`} secondary={`Goals: ${player.Goals ?? 0}`} />
+                  <ListItem key={player.ID} disableGutters>
+                    <Stack direction="row" alignItems="center" width="100%">
+                      <Typography sx={{ minWidth: 24, fontWeight: 500 }}>{idx + 1}</Typography>
+                      <Typography sx={{ flexGrow: 1, ml: 2 }}>{player.Name}</Typography>
+                      <Typography sx={{ fontWeight: 500, color: 'primary.main' }}>
+                        {player.Goals ?? 0}
+                      </Typography>
+                    </Stack>
                   </ListItem>
                 ))}
               </List>
@@ -45,7 +51,7 @@ export default function Leaderboard(){
           </Card>
         </Grid>
         <Grid item size={4}>
-          <Card sx={{ width: '100%' }}>
+          <Card sx={{ width: '100%',  borderRadius: 4 }}>
             <CardContent>
               <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>
                 <TrackChangesIcon color="primary" />
@@ -53,8 +59,14 @@ export default function Leaderboard(){
               </Stack>
               <List dense>
                 {assists.map((player, idx) => (
-                  <ListItem key={player.ID}>
-                    <ListItemText primary={`${idx + 1}. ${player.Name}`} secondary={`Assists: ${player.Assists ?? 0}`} />
+                  <ListItem key={player.ID} disableGutters>
+                    <Stack direction="row" alignItems="center" width="100%">
+                      <Typography sx={{ minWidth: 24, fontWeight: 500 }}>{idx + 1}</Typography>
+                      <Typography sx={{ flexGrow: 1, ml: 2 }}>{player.Name}</Typography>
+                      <Typography sx={{ fontWeight: 500, color: 'primary.main' }}>
+                        {player.Assists ?? 0}
+                      </Typography>
+                    </Stack>
                   </ListItem>
                 ))}
               </List>
@@ -62,7 +74,7 @@ export default function Leaderboard(){
           </Card>
         </Grid>
         <Grid item size={4}>
-          <Card sx={{ width: '100%' }}>
+          <Card sx={{ width: '100%', borderRadius: 4 }}>
             <CardContent>
               <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>
                 <EmojiEventsIcon color="primary" />
@@ -70,8 +82,14 @@ export default function Leaderboard(){
               </Stack>
               <List dense>
                 {motm.map((player, idx) => (
-                  <ListItem key={player.ID}>
-                    <ListItemText primary={`${idx + 1}. ${player.Name}`} secondary={`MOTM: ${player.ManOfTheMatch ?? 0}`} />
+                  <ListItem key={player.ID} disableGutters>
+                    <Stack direction="row" alignItems="center" width="100%">
+                      <Typography sx={{ minWidth: 24, fontWeight: 500 }}>{idx + 1}</Typography>
+                      <Typography sx={{ flexGrow: 1, ml: 2 }}>{player.Name}</Typography>
+                      <Typography sx={{ fontWeight: 500, color: 'primary.main' }}>
+                        {player.ManOfTheMatch ?? 0}
+                      </Typography>
+                    </Stack>
                   </ListItem>
                 ))}
               </List>

@@ -12,8 +12,8 @@ import SportsSoccerIcon from '@mui/icons-material/SportsSoccer';
 import PeopleIcon from '@mui/icons-material/People';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
-import SearchIcon from '@mui/icons-material/Search';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import logo from '@/assets/logo.png';
 
 const drawerWidth = 240;
 
@@ -22,7 +22,6 @@ const navItems = [
   { text: 'Fixtures', icon: <SportsSoccerIcon />, link: "/fixtures" },
   { text: 'Players', icon: <PeopleIcon />, link: "/players" },
 ];
-
 interface LayoutProps {
   darkMode: boolean;
   setDarkMode: React.Dispatch<React.SetStateAction<boolean>>;
@@ -83,22 +82,8 @@ export default function Layout({ darkMode, setDarkMode }: LayoutProps) {
               <MenuIcon />
             </IconButton>
           )}
-          {/* Search */}
-          <TextField
-            variant="outlined"
-            size="small"
-            placeholder="Search…"
-            sx={{ mr: 2, width: 200, bgcolor: 'background.default', borderRadius: 1 }}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon />
-                </InputAdornment>
-              ),
-            }}
-          />
+          {/* Date */}
           <Box sx={{ flexGrow: 1 }} />
-          {/* Date and Notification */}
           <Button startIcon={<CalendarTodayIcon />} sx={{ color: 'text.secondary', mr: 2 }}>
           {currentDate}
           </Button>
@@ -141,3 +126,4 @@ export default function Layout({ darkMode, setDarkMode }: LayoutProps) {
     </Box>
   );
 }
+
