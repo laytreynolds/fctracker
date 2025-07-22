@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-    Grid, Card, CardContent, Typography, List, ListItem, ListItemText, Stack
+    Grid, Card, CardContent, Typography, List, ListItem, Stack
   } from '@mui/material';
 
 import SportsSoccerIcon from '@mui/icons-material/SportsSoccer'; // Goal

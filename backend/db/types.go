@@ -36,15 +36,19 @@ type Team struct {
 }
 
 type Fixture struct {
-	ID                bson.ObjectID   `bson:"_id,omitempty"`
-	Date              string          `bson:"date"`
-	HomeTeam          string          `bson:"home_team"`
-	AwayTeam          string          `bson:"away_team"`
-	HomeScore         string          `bson:"home_score"`
-	AwayScore         string          `bson:"away_score"`
-	ManOfTheMatch     bson.ObjectID   `bson:"man_of_the_match,omitempty"`
-	Lineup            []bson.ObjectID `bson:"lineup"`
-	ManOfTheMatchName string          `bson:"man_of_the_match_name"`
+	ID                 bson.ObjectID   `bson:"_id,omitempty"`
+	Date               string          `bson:"date"`
+	HomeTeam           string          `bson:"home_team"`
+	AwayTeam           string          `bson:"away_team"`
+	HomeScore          string          `bson:"home_score"`
+	AwayScore          string          `bson:"away_score"`
+	ManOfTheMatch      bson.ObjectID   `bson:"man_of_the_match,omitempty"`
+	Lineup             []bson.ObjectID `bson:"lineup"`
+	ManOfTheMatchName  string          `bson:"man_of_the_match_name,omitempty"`
+	GoalScorers        []bson.ObjectID `bson:"goal_scorers,omitempty"`
+	GoalScorersNames   []string        `bson:"goal_scorers_names,omitempty"`
+	AssistScorers      []bson.ObjectID `bson:"assist_scorers,omitempty"`
+	AssistScorersNames []string        `bson:"assist_scorers_names,omitempty"`
 }
 
 // In db/types.go or db/db.go

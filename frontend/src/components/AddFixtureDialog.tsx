@@ -152,7 +152,7 @@ export default function AddFixtureDialog({ open, onClose, onSuccess }: AddFixtur
     <Dialog open={open} onClose={handleCloseDialog}>
       <DialogTitle>Add New Fixture</DialogTitle>
       <DialogContent>
-        <Stack spacing={2} sx={{ mt: 1, minWidth: '400px' }}>
+        <Stack spacing={2} sx={{ mt: 1, minWidth: '500px' }}>
           <TextField
             label="Fixture Date"
             name="date"

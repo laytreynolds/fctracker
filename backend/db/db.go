@@ -324,6 +324,46 @@ func GetFixtures() ([]Fixture, error) {
 	return results, nil
 }
 
+func GetFixtureByID(id string) (Fixture, error) {
+	var result Fixture
+	coll := client.Database(db).Collection(fixtures)
+	objID, err := bson.ObjectIDFromHex(id)
+	if err != nil {
+		return result, err
+	}
+
+	pipeline := mongo.Pipeline{
+		{{"$match", bson.D{{"_id", objID}}}},
+		{{"$lookup", bson.D{
+			{"from", "players"},
+			{"localField", "man_of_the_match"},
+			{"foreignField", "_id"},
+			{"as", "motmDetails"},
+		}}},
+		{{"$addFields", bson.D{
+			{"man_of_the_match_name", bson.D{
+				{"$arrayElemAt", bson.A{"$motmDetails.name", 0}},
+			}},
+		}}},
+		{{"$project", bson.D{
+			{"motmDetails", 0},
+		}}},
+	}
+
+	cursor, err := coll.Aggregate(context.TODO(), pipeline)
+	if err != nil {
+		return result, err
+	}
+	var fixtures []Fixture
+	if err = cursor.All(context.TODO(), &fixtures); err != nil {
+		return result, err
+	}
+	if len(fixtures) == 0 {
+		return result, fmt.Errorf("fixture not found")
+	}
+	return fixtures[0], nil
+}
+
 func GetLeaderboard(stat string) ([]Player, error) {
 	coll := client.Database(db).Collection(players)
 	opts := options.Find().SetSort(bson.D{{stat, -1}}).SetLimit(5)
@@ -370,4 +410,121 @@ func GetLeaderboardFixtures() ([]Fixture, error) {
 		return nil, err
 	}
 	return results, nil
+}
+
+// 1. Add goalscorer to fixture
+func AddGoalscorerToFixtureOnly(fixtureID, playerID string) error {
+	collFixtures := client.Database(db).Collection(fixtures)
+	collPlayers := client.Database(db).Collection(players)
+
+	fixtureObjID, err := bson.ObjectIDFromHex(fixtureID)
+	if err != nil {
+		return err
+	}
+	playerObjID, err := bson.ObjectIDFromHex(playerID)
+	if err != nil {
+		return err
+	}
+
+	// Get player name
+	var player Player
+	err = collPlayers.FindOne(context.TODO(), bson.M{"_id": playerObjID}).Decode(&player)
+	if err != nil {
+		return err
+	}
+
+	update := bson.M{
+		"$push": bson.M{
+			"goal_scorers":       playerObjID,
+			"goal_scorers_names": player.Name,
+		},
+	}
+
+	_, err = collFixtures.UpdateOne(
+		context.TODO(),
+		bson.M{"_id": fixtureObjID},
+		update,
+	)
+	return err
+}
+
+// 2. Count player goals
+func CountPlayerGoals(playerObjID bson.ObjectID) (int64, error) {
+	collFixtures := client.Database(db).Collection(fixtures)
+
+	pipeline := mongo.Pipeline{
+		{{"$project", bson.D{
+			{"count", bson.D{
+				{"$size", bson.D{
+					{"$filter", bson.D{
+						{"input", bson.D{{"$ifNull", bson.A{"$goal_scorers", bson.A{}}}}},
+						{"as", "scorer"},
+						{"cond", bson.D{{"$eq", bson.A{"$$scorer", playerObjID}}}},
+					}},
+				}},
+			}},
+		}}},
+		{{"$group", bson.D{
+			{"_id", nil},
+			{"total", bson.D{{"$sum", "$count"}}},
+		}}},
+	}
+
+	cursor, err := collFixtures.Aggregate(context.TODO(), pipeline)
+	if err != nil {
+		return 0, err
+	}
+	defer cursor.Close(context.TODO())
+
+	var result struct {
+		Total int64 `bson:"total"`
+	}
+	if cursor.Next(context.TODO()) {
+		if err := cursor.Decode(&result); err != nil {
+			return 0, err
+		}
+		return result.Total, nil
+	}
+	return 0, nil
+}
+
+// 3. Update player goals field
+func UpdatePlayerGoalsField(playerObjID bson.ObjectID, count int64) error {
+	collPlayers := client.Database(db).Collection(players)
+	_, err := collPlayers.UpdateOne(
+		context.TODO(),
+		bson.M{"_id": playerObjID},
+		bson.M{"$set": bson.M{"goals": count}},
+	)
+	return err
+}
+
+// 4. Coordinator
+func AddGoalscorerToFixture(fixtureID, playerID string) (Fixture, error) {
+	// Add goalscorer to fixture
+	err := AddGoalscorerToFixtureOnly(fixtureID, playerID)
+	if err != nil {
+		return Fixture{}, err
+	}
+
+	// Convert playerID to ObjectID
+	playerObjID, err := bson.ObjectIDFromHex(playerID)
+	if err != nil {
+		return Fixture{}, err
+	}
+
+	// Count goals
+	count, err := CountPlayerGoals(playerObjID)
+	if err != nil {
+		return Fixture{}, err
+	}
+
+	// Update player goals field
+	err = UpdatePlayerGoalsField(playerObjID, count)
+	if err != nil {
+		return Fixture{}, err
+	}
+
+	// Return the updated fixture (refetch as needed)
+	return GetFixtureByID(fixtureID)
 }

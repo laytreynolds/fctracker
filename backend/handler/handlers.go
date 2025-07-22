@@ -193,6 +193,16 @@ func getFixtures(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"fixtures": fixtures, "error": ""})
 }
 
+func getFixtureByID(c *gin.Context) {
+	id := c.Param("id")
+	fixture, err := db.GetFixtureByID(id)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Fixture not found"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"fixture": fixture})
+}
+
 func leaderboardGoals(c *gin.Context) {
 	players, err := db.GetLeaderboard("goals")
 	if err != nil {
@@ -227,4 +237,22 @@ func leaderboardFixtures(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"fixtures": fixtures, "error": ""})
+}
+
+func addGoalscorerToFixture(c *gin.Context) {
+	fixtureID := c.Query("fixtureId")
+	playerID := c.Query("playerId")
+
+	if fixtureID == "" || playerID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Missing fixtureId or playerId"})
+		return
+	}
+
+	updated, err := db.AddGoalscorerToFixture(fixtureID, playerID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"fixture": updated})
 }

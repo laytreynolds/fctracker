@@ -3,10 +3,9 @@ import {
 Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TablePagination, Typography, Box, Stack, Button
 } from '@mui/material';
 import type{ TFixture } from '@/types/types';
-import AddFixtureDialog from '@/components/AddFixtureDialog';
 import { useNavigate } from 'react-router-dom';
 
-interface FixtureTableProps {
+interface DashboardFixtureTableProps {
   page: number;
   rowsPerPage: number;
   onPageChange: (event: unknown, newPage: number) => void;
@@ -14,43 +13,29 @@ interface FixtureTableProps {
 
 }
 
-export default function FixtureTable({
+export default function DashboardFixtureTable({
 page,
 rowsPerPage,
 onPageChange, 
 onRowsPerPageChange,
-}: FixtureTableProps) {
+}: DashboardFixtureTableProps) {
 
   const [fixtures, setFixtures] = React.useState<TFixture[]>([]);  
-  const [open, setOpen] = React.useState(false);
-  const [refresh, setRefresh] = React.useState(0);
   const navigate = useNavigate();
 
+ 
 
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
 
-  const handleSuccess = () => {
-    handleClose();
-  // To refresh the fixtures table when the dialog closes, you need to trigger a re-fetch of the fixture data in the FixtureTable component.
-  // One common way is to use a "key" prop or a "refresh" state that you increment to force a re-render/re-fetch.
-  // Here, we'll add a "refresh" state and pass it to FixtureTable as a prop.
 
-    setRefresh((prev) => prev + 1);
-  };
-
-   // Fetch Fixtures
-   React.useEffect(() => {
-    fetch('http://localhost:8080/api/fixture/getall').then(res => res.json()).then(data => setFixtures(data.fixtures || []));
-  }, [refresh]);
+    // Fetch Fixtures
+    React.useEffect(() => {
+    fetch('http://localhost:8080/api/leaderboard/fixtures').then(res => res.json()).then(data => setFixtures(data.fixtures || []));
+  }, []);
 
   return (       
      <Box sx={{ mx: 'auto' }}>
       <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-        <Typography variant="h5">Fixtures</Typography>
-        <Button variant="contained" color="primary" onClick={handleOpen}>
-          Add Fixture
-        </Button>
+        <Typography variant="h5">Last 5 Fixtures</Typography>
       </Stack>
     <Paper sx={{ width: '100%', overflow: 'hidden', borderRadius: 4 }}>
       <TableContainer>
@@ -80,7 +65,7 @@ onRowsPerPageChange,
                     Details
                   </Button>
                 </TableCell>
-              </TableRow>
+              </TableRow> 
             ))}
           </TableBody>
         </Table>
@@ -95,7 +80,6 @@ onRowsPerPageChange,
         rowsPerPageOptions={[5, 10, 25]}
       />
     </Paper>
-    <AddFixtureDialog open={open} onClose={handleClose} onSuccess={handleSuccess} />
     </Box>
   );
 }

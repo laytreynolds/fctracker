@@ -4,6 +4,7 @@ import PlayersPage from "@/pages/PlayersPage";
 import FixturePage from "@/pages/FixturePage";
 import Home from '@/pages/Home';
 import TeamPage from '@/pages/TeamPage';
+import FixtureDetailPage from '@/pages/FixtureDetailPage';
 
 interface AppProps {
   darkMode: boolean;
@@ -18,6 +19,7 @@ function App({ darkMode, setDarkMode} : AppProps) {
       <Route path="/players" element={<PlayersPage />}/>
       <Route path="/fixtures" element={<FixturePage />}/>
       <Route path="/teams" element={<TeamPage />}/>
+      <Route path="/fixtures/:id" element={<FixtureDetailPage />}/>
       </Route>
     </Routes>
   );
