@@ -36,6 +36,7 @@ type Team struct {
 }
 
 type Fixture struct {
+	ID                bson.ObjectID   `bson:"_id,omitempty"`
 	Date              string          `bson:"date"`
 	HomeTeam          string          `bson:"home_team"`
 	AwayTeam          string          `bson:"away_team"`

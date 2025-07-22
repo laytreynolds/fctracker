@@ -192,3 +192,39 @@ func getFixtures(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"fixtures": fixtures, "error": ""})
 }
+
+func leaderboardGoals(c *gin.Context) {
+	players, err := db.GetLeaderboard("goals")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"players": players})
+}
+
+func leaderboardAssists(c *gin.Context) {
+	players, err := db.GetLeaderboard("assists")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"players": players})
+}
+
+func leaderboardMotm(c *gin.Context) {
+	players, err := db.GetLeaderboard("man_of_the_match")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"players": players, "error": ""})
+}
+
+func leaderboardFixtures(c *gin.Context) {
+	fixtures, err := db.GetLeaderboardFixtures()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"fixtures": fixtures, "error": ""})
+}

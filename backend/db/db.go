@@ -4,10 +4,9 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"math/rand"
 	"os"
 	"strconv"
-
-	"math/rand"
 
 	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/v2/bson"
@@ -54,6 +53,58 @@ func Connect() {
 		log.Fatal(err)
 	}
 	fmt.Println("connected to MongoDB...")
+}
+
+func SeedPlayers() error {
+	collPlayers := client.Database(db).Collection(players)
+	collTeams := client.Database(db).Collection(teams)
+
+	// Create a team
+	team := Team{
+		Name:    "Seeded FC",
+		Coach:   "Coach Random",
+		Players: []bson.ObjectID{},
+		Founded: "2024",
+	}
+	teamResult, err := collTeams.InsertOne(context.TODO(), team)
+	if err != nil {
+		return err
+	}
+	teamID := teamResult.InsertedID.(bson.ObjectID)
+
+	names := []string{"Alex", "Jamie", "Chris", "Taylor", "Jordan", "Morgan", "Casey", "Riley", "Drew", "Sam"}
+	positions := []string{"GK", "CB", "LB", "RB", "CM", "CDM", "CAM", "LW", "RW", "ST"}
+	funFacts := []string{"Loves pizza", "Can juggle", "Fastest runner", "Team joker", "Plays guitar", "Chess champion", "Speaks 3 languages", "Has a pet snake", "Never late", "Wears lucky socks"}
+
+	var playerIDs []bson.ObjectID
+	for i := 0; i < 10; i++ {
+		age := rand.Intn(10) + 18 // 18-27
+		player := Player{
+			Name:          names[i%len(names)],
+			Age:           strconv.Itoa(age),
+			Position:      positions[i%len(positions)],
+			FunFact:       funFacts[i%len(funFacts)],
+			Goals:         rand.Intn(20),
+			Assists:       rand.Intn(10),
+			GamesPlayed:   rand.Intn(30) + 1,
+			ManOfTheMatch: rand.Intn(5),
+			Active:        true,
+			TeamID:        teamID,
+		}
+		res, err := collPlayers.InsertOne(context.TODO(), player)
+		if err != nil {
+			return err
+		}
+		playerIDs = append(playerIDs, res.InsertedID.(bson.ObjectID))
+	}
+
+	// Optionally update the team with the player IDs
+	_, err = collTeams.UpdateByID(context.TODO(), teamID, bson.M{"$set": bson.M{"players": playerIDs}})
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func GetActivePlayers() ([]Player, error) {
@@ -147,58 +198,6 @@ func DeletePlayer(id string) error {
 	if err != nil {
 		return err
 	}
-	return nil
-}
-
-func SeedPlayers() error {
-	collPlayers := client.Database(db).Collection(players)
-	collTeams := client.Database(db).Collection(teams)
-
-	// Create a team
-	team := Team{
-		Name:    "Seeded FC",
-		Coach:   "Coach Random",
-		Players: []bson.ObjectID{},
-		Founded: "2024",
-	}
-	teamResult, err := collTeams.InsertOne(context.TODO(), team)
-	if err != nil {
-		return err
-	}
-	teamID := teamResult.InsertedID.(bson.ObjectID)
-
-	names := []string{"Alex", "Jamie", "Chris", "Taylor", "Jordan", "Morgan", "Casey", "Riley", "Drew", "Sam"}
-	positions := []string{"GK", "CB", "LB", "RB", "CM", "CDM", "CAM", "LW", "RW", "ST"}
-	funFacts := []string{"Loves pizza", "Can juggle", "Fastest runner", "Team joker", "Plays guitar", "Chess champion", "Speaks 3 languages", "Has a pet snake", "Never late", "Wears lucky socks"}
-
-	var playerIDs []bson.ObjectID
-	for i := 0; i < 10; i++ {
-		age := rand.Intn(10) + 18 // 18-27
-		player := Player{
-			Name:          names[i%len(names)],
-			Age:           strconv.Itoa(age),
-			Position:      positions[i%len(positions)],
-			FunFact:       funFacts[i%len(funFacts)],
-			Goals:         rand.Intn(20),
-			Assists:       rand.Intn(10),
-			GamesPlayed:   rand.Intn(30) + 1,
-			ManOfTheMatch: rand.Intn(5),
-			Active:        true,
-			TeamID:        teamID,
-		}
-		res, err := collPlayers.InsertOne(context.TODO(), player)
-		if err != nil {
-			return err
-		}
-		playerIDs = append(playerIDs, res.InsertedID.(bson.ObjectID))
-	}
-
-	// Optionally update the team with the player IDs
-	_, err = collTeams.UpdateByID(context.TODO(), teamID, bson.M{"$set": bson.M{"players": playerIDs}})
-	if err != nil {
-		return err
-	}
-
 	return nil
 }
 
@@ -322,5 +321,53 @@ func GetFixtures() ([]Fixture, error) {
 		return nil, err
 	}
 
+	return results, nil
+}
+
+func GetLeaderboard(stat string) ([]Player, error) {
+	coll := client.Database(db).Collection(players)
+	opts := options.Find().SetSort(bson.D{{stat, -1}}).SetLimit(5)
+	cursor, err := coll.Find(context.TODO(), bson.D{}, opts)
+	if err != nil {
+		return nil, err
+	}
+	var results []Player
+	if err = cursor.All(context.TODO(), &results); err != nil {
+		return nil, err
+	}
+	return results, nil
+}
+
+func GetLeaderboardFixtures() ([]Fixture, error) {
+	coll := client.Database(db).Collection(fixtures)
+
+	pipeline := mongo.Pipeline{
+		{{"$lookup", bson.D{
+			{"from", "players"},
+			{"localField", "man_of_the_match"},
+			{"foreignField", "_id"},
+			{"as", "motmDetails"},
+		}}},
+		{{"$addFields", bson.D{
+			{"man_of_the_match_name", bson.D{
+				{"$arrayElemAt", bson.A{"$motmDetails.name", 0}},
+			}},
+		}}},
+		{{"$project", bson.D{
+			{"motmDetails", 0},
+		}}},
+		{{"$sort", bson.D{{"date", -1}}}},
+		{{"$limit", 5}},
+	}
+
+	cursor, err := coll.Aggregate(context.TODO(), pipeline)
+	if err != nil {
+		return nil, err
+	}
+
+	var results []Fixture
+	if err = cursor.All(context.TODO(), &results); err != nil {
+		return nil, err
+	}
 	return results, nil
 }

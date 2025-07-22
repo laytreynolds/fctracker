@@ -39,6 +39,11 @@ func Start() {
 	router.POST("/api/fixture/add", addFixture)
 	router.GET("/api/fixture/getall", getFixtures)
 
+	router.GET("/api/leaderboard/goals", leaderboardGoals)
+	router.GET("/api/leaderboard/assists", leaderboardAssists)
+	router.GET("/api/leaderboard/motm", leaderboardMotm)
+	router.GET("/api/leaderboard/fixtures", leaderboardFixtures)
+
 	s := &http.Server{
 		Addr:         port,
 		Handler:      router,

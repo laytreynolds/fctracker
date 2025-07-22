@@ -13,13 +13,12 @@ import PeopleIcon from '@mui/icons-material/People';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
 import SearchIcon from '@mui/icons-material/Search';
-import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 
 const drawerWidth = 240;
 
 const navItems = [
-  { text: 'Home', icon: <HomeIcon />, link: "/"  },
+  { text: 'Home', icon: <HomeIcon />, link: "/home"  },
   { text: 'Fixtures', icon: <SportsSoccerIcon />, link: "/fixtures" },
   { text: 'Players', icon: <PeopleIcon />, link: "/players" },
 ];
@@ -50,7 +49,7 @@ export default function Layout({ darkMode, setDarkMode }: LayoutProps) {
   const handleMenuClose = () => setAnchorEl(null);
   const handleDarkModeToggle = () => setDarkMode((prev: boolean) => !prev);
 
-  const [currentDate, setCurrentDate] = React.useState(getDate());
+  const [currentDate] = React.useState(getDate());
 
 
   const drawer = (
