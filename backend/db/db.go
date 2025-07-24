@@ -530,7 +530,7 @@ func AddGoalscorerToFixture(fixtureID, playerID string) (Fixture, error) {
 }
 
 // 1. Add assis to fixture
-func AddAssistToFixtureOnly(fixtureID, playerID string) error {
+func AddStatToFixtureOnly(fixtureID, playerID, stat string) error {
 	collFixtures := client.Database(db).Collection(fixtures)
 	collPlayers := client.Database(db).Collection(players)
 
@@ -552,8 +552,8 @@ func AddAssistToFixtureOnly(fixtureID, playerID string) error {
 
 	update := bson.M{
 		"$push": bson.M{
-			"assist_scorers":       playerObjID,
-			"assist_scorers_names": player.Name,
+			stat:            playerObjID,
+			stat + "_names": player.Name,
 		},
 	}
 
@@ -566,7 +566,7 @@ func AddAssistToFixtureOnly(fixtureID, playerID string) error {
 }
 
 // 2. Count player assists
-func CountPlayerAssists(playerObjID bson.ObjectID) (int64, error) {
+func CountPlayerStat(playerObjID bson.ObjectID, stat string) (int64, error) {
 	collFixtures := client.Database(db).Collection(fixtures)
 
 	pipeline := mongo.Pipeline{
@@ -574,7 +574,7 @@ func CountPlayerAssists(playerObjID bson.ObjectID) (int64, error) {
 			{"count", bson.D{
 				{"$size", bson.D{
 					{"$filter", bson.D{
-						{"input", bson.D{{"$ifNull", bson.A{"$assist_scorers", bson.A{}}}}},
+						{"input", bson.D{{"$ifNull", bson.A{"$" + stat, bson.A{}}}}},
 						{"as", "scorer"},
 						{"cond", bson.D{{"$eq", bson.A{"$$scorer", playerObjID}}}},
 					}},
@@ -605,21 +605,21 @@ func CountPlayerAssists(playerObjID bson.ObjectID) (int64, error) {
 	return 0, nil
 }
 
-// 3. Update player assists field
-func UpdatePlayerAssistsField(playerObjID bson.ObjectID, count int64) error {
+// 3. Update player stat field
+func UpdatePlayerStatField(playerObjID bson.ObjectID, count int64, stat string) error {
 	collPlayers := client.Database(db).Collection(players)
 	_, err := collPlayers.UpdateOne(
 		context.TODO(),
 		bson.M{"_id": playerObjID},
-		bson.M{"$set": bson.M{"assists": count}},
+		bson.M{"$set": bson.M{stat: count}},
 	)
 	return err
 
 }
 
-func AddAssistToFixture(fixtureID, playerID string) (Fixture, error) {
+func AddStatToFixture(fixtureID, playerID, stat string) (Fixture, error) {
 	// Add goalscorer to fixture
-	err := AddAssistToFixtureOnly(fixtureID, playerID)
+	err := AddStatToFixtureOnly(fixtureID, playerID, stat)
 	if err != nil {
 		return Fixture{}, err
 	}
@@ -630,14 +630,14 @@ func AddAssistToFixture(fixtureID, playerID string) (Fixture, error) {
 		return Fixture{}, err
 	}
 
-	// Count assists
-	count, err := CountPlayerAssists(playerObjID)
+	// Count stat
+	count, err := CountPlayerStat(playerObjID, stat)
 	if err != nil {
 		return Fixture{}, err
 	}
 
-	// Update player assists field
-	err = UpdatePlayerAssistsField(playerObjID, count)
+	// Update player stat field
+	err = UpdatePlayerStatField(playerObjID, count, stat)
 	if err != nil {
 		return Fixture{}, err
 	}
