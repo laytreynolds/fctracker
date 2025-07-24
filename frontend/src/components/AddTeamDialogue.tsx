@@ -8,7 +8,6 @@ import {
   Stack,
   Button,
 } from '@mui/material';
-import type { SelectChangeEvent } from '@mui/material';
 
 // Component Props
 interface AddFixtureDialogProps {
@@ -28,11 +27,6 @@ export default function AddFixtureDialog({ open, onClose, onSuccess }: AddFixtur
   // Handlers
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-  };
-  
-  const handleSelectChange = (event: SelectChangeEvent) => {
-    const { name, value } = event.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const resetForm = () => {

@@ -15,7 +15,7 @@ export default function PlayersPage() {
     const [refresh, setRefresh] = React.useState(0);
   
   
-    const handleChangePage = (event: unknown, newPage: number) => {
+    const handleChangePage = (_: unknown, newPage: number) => {
       setPage(newPage);
     };
   

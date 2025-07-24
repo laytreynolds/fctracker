@@ -12,8 +12,6 @@ export default function AddGoalscorerDialogue({ open, onClose, fixtureId }: {
 }) {
   const [players, setPlayers] = React.useState<TPlayer[]>([]);
   const [loading, setLoading] = React.useState(true);
-  const [addGoalOpen, setAddGoalOpen] = React.useState(false);
-
 
   React.useEffect(() => {
     if (open) {
@@ -35,10 +33,6 @@ export default function AddGoalscorerDialogue({ open, onClose, fixtureId }: {
       body: JSON.stringify({ fixtureId: fixtureId, playerId }),
     })
       .then(res => res.json())
-      .then(() => {
-        setAddGoalOpen(false)
-        // Optionally, refetch fixture data here to update the UI
-      });
   };
   
   return (

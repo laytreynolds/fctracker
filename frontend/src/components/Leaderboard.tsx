@@ -27,7 +27,7 @@ export default function Leaderboard(){
       spacing={2}
       justifyContent="center"
           >
-<Grid item size={4}>
+<Grid size={4}>
           <Card sx={{ width: '100%', borderRadius: 4 }}>
             <CardContent>
               <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>
@@ -50,7 +50,7 @@ export default function Leaderboard(){
             </CardContent>
           </Card>
         </Grid>
-        <Grid item size={4}>
+        <Grid size={4}>
           <Card sx={{ width: '100%',  borderRadius: 4 }}>
             <CardContent>
               <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>
@@ -73,7 +73,7 @@ export default function Leaderboard(){
             </CardContent>
           </Card>
         </Grid>
-        <Grid item size={4}>
+        <Grid size={4}>
           <Card sx={{ width: '100%', borderRadius: 4 }}>
             <CardContent>
               <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>

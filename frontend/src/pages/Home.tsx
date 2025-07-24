@@ -18,7 +18,7 @@ export default function Home() {
         <DashboardFixtureTable
           page={page}
           rowsPerPage={rowsPerPage}
-          onPageChange={(e, newPage) => setPage(newPage)} 
+          onPageChange={(_, newPage) => setPage(newPage)} 
           onRowsPerPageChange={e => setRowsPerPage(parseInt(e.target.value, 10))}
         />
       </Box>
