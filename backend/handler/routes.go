@@ -3,6 +3,7 @@ package handler
 import (
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -10,7 +11,6 @@ import (
 )
 
 const (
-	port    = ":8080"
 	timeout = 30 * time.Second
 )
 
@@ -20,6 +20,7 @@ var (
 
 func Start() {
 
+	port := os.Getenv("PORT")
 	router.Use(cors.Default())
 
 	// init
