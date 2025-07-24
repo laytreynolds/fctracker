@@ -102,7 +102,7 @@ export default function FixtureDetailPage() {
         </CardContent>
       </Card>
       <Grid container spacing={2}>
-      <Grid item size={4}>
+      <Grid size={4}>
       <Card sx={{ borderRadius: 4 }}>
             <CardContent>
               <Typography variant="h6" fontWeight={600} gutterBottom>Lineup</Typography>
@@ -118,7 +118,7 @@ export default function FixtureDetailPage() {
             </CardContent>
           </Card>
         </Grid>
-        <Grid item size={4}>
+        <Grid size={4}>
           <Card sx={{ borderRadius: 4, mb: 2 }}>
             <CardContent>
               <Typography variant="h6" fontWeight={600} gutterBottom>Goal Scorers</Typography>
@@ -134,7 +134,7 @@ export default function FixtureDetailPage() {
             </CardContent>
           </Card>
         </Grid>
-        <Grid item size={4}>
+        <Grid size={4}>
           <Card sx={{ borderRadius: 4 }}>
             <CardContent>
               <Typography variant="h6" fontWeight={600} gutterBottom>Assist Providers</Typography>

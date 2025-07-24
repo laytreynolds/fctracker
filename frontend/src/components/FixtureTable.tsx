@@ -6,25 +6,24 @@ import type{ TFixture } from '@/types/types';
 import AddFixtureDialog from '@/components/AddFixtureDialog';
 import { useNavigate } from 'react-router-dom';
 
-interface FixtureTableProps {
-  page: number;
-  rowsPerPage: number;
-  onPageChange: (event: unknown, newPage: number) => void;
-  onRowsPerPageChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
 
-}
-
-export default function FixtureTable({
-page,
-rowsPerPage,
-onPageChange, 
-onRowsPerPageChange,
-}: FixtureTableProps) {
+export default function FixtureTable() {
 
   const [fixtures, setFixtures] = React.useState<TFixture[]>([]);  
   const [open, setOpen] = React.useState(false);
   const [refresh, setRefresh] = React.useState(0);
   const navigate = useNavigate();
+  const [page, setPage] = React.useState(0);
+  const [rowsPerPage, setRowsPerPage] = React.useState(5);
+
+  const handleChangePage = (_: unknown, newPage: number) => {
+    setPage(newPage);
+  };
+
+   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
 
 
   const handleOpen = () => setOpen(true);
@@ -89,9 +88,9 @@ onRowsPerPageChange,
         component="div"
         count={fixtures.length}
         page={page}
-        onPageChange={onPageChange}
+        onPageChange={handleChangePage}
         rowsPerPage={rowsPerPage}
-        onRowsPerPageChange={onRowsPerPageChange}
+        onRowsPerPageChange={handleChangeRowsPerPage}
         rowsPerPageOptions={[5, 10, 25]}
       />
     </Paper>
