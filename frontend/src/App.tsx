@@ -15,13 +15,14 @@ function App({ darkMode, setDarkMode} : AppProps) {
   return (
     <Routes>
       <Route path="/" element={<Layout darkMode={darkMode} setDarkMode={setDarkMode} />}>
-      <Route path="/home" element={<Home />}/>
-      <Route path="/players" element={<PlayersPage />}/>
-      <Route path="/fixtures" element={<FixturePage />}/>
-      <Route path="/teams" element={<TeamPage />}/>
-      <Route path="/fixtures/:id" element={<FixtureDetailPage />}/>
+        <Route index element={<Home />}/>
+        <Route path="/players" element={<PlayersPage />}/>
+        <Route path="/fixtures" element={<FixturePage />}/>
+        <Route path="/teams" element={<TeamPage />}/>
+        <Route path="/fixtures/:id" element={<FixtureDetailPage />}/>
       </Route>
     </Routes>
   );
 }
 export default App;
+  

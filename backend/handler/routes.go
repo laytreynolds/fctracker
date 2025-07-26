@@ -1,9 +1,13 @@
 package handler
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
+	"strings"
+	"syscall"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -19,9 +23,34 @@ var (
 )
 
 func Start() {
+	// Set Gin to release mode in production
+	if os.Getenv("GIN_MODE") == "release" {
+		gin.SetMode(gin.ReleaseMode)
+	}
 
 	port := os.Getenv("PORT")
-	router.Use(cors.Default())
+
+	// Parse allowed origins from environment variable with fallbacks
+	allowedOrigins := []string{"https://fctracker-laytreynolds-projects.vercel.app", "http://localhost:3000"}
+
+	if envOrigins := os.Getenv("ALLOWED_ORIGINS"); envOrigins != "" {
+		// Split by comma if multiple origins are provided
+		origins := strings.Split(envOrigins, ",")
+		// Trim whitespace from each origin
+		for i, origin := range origins {
+			origins[i] = strings.TrimSpace(origin)
+		}
+		allowedOrigins = origins
+	}
+
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     allowedOrigins,
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
 
 	// init
 	router.POST("/api/seed", seed)
@@ -51,18 +80,41 @@ func Start() {
 	router.GET("/api/leaderboard/motm", leaderboardMotm)
 	router.GET("/api/leaderboard/fixtures", leaderboardFixtures)
 
+	// Health check endpoint
+	router.GET("/health", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"status": "healthy"})
+	})
+
 	s := &http.Server{
-		Addr:         port,
+		Addr:         ":" + port,
 		Handler:      router,
 		ReadTimeout:  timeout,
 		WriteTimeout: timeout,
+		IdleTimeout:  120 * time.Second,
 	}
 
-	// Start the server
-
+	// Start server in a goroutine
 	go func() {
-		if err := s.ListenAndServe(); err != http.ErrServerClosed {
-			log.Fatal(err)
+		log.Printf("Server starting on port %s", port)
+		log.Printf("Allowed origins: %v", allowedOrigins)
+		if err := s.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("Failed to start server: %v", err)
 		}
 	}()
+
+	// Wait for interrupt signal to gracefully shutdown the server
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+	log.Println("Shutting down server...")
+
+	// Create a deadline for server shutdown
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	if err := s.Shutdown(ctx); err != nil {
+		log.Fatal("Server forced to shutdown:", err)
+	}
+
+	log.Println("Server exited")
 }

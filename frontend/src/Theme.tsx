@@ -1,5 +1,6 @@
 import React from "react"
 import App from "./App"
+import ErrorBoundary from "@/components/ErrorBoundary"
 
 import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
@@ -24,11 +25,13 @@ export default function Theme() {
     );
   
     return (
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <BrowserRouter>
-          <App darkMode={darkMode} setDarkMode={setDarkMode} />
-        </BrowserRouter>
-      </ThemeProvider>
+      <ErrorBoundary>
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <BrowserRouter>
+            <App darkMode={darkMode} setDarkMode={setDarkMode} />
+          </BrowserRouter>
+        </ThemeProvider>
+      </ErrorBoundary>
     );
   }

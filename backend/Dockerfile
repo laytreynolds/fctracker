@@ -1,28 +1,50 @@
-# Start from the latest golang base image
-FROM golang:1.21 as builder
+# Build stage
+FROM golang:1.21-alpine AS builder
+
+# Install git and ca-certificates (needed for go mod download)
+RUN apk add --no-cache git ca-certificates
 
 WORKDIR /app
 
-# Copy go mod and sum files
+# Copy go mod files
 COPY go.mod go.sum ./
+
+# Download dependencies
 RUN go mod download
 
-# Copy the source code
+# Copy source code
 COPY . .
 
-# Build the Go app
-RUN go build -o server .
+# Build the application with optimizations
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main .
 
-# Start a new, minimal image
-FROM gcr.io/distroless/base-debian11
+# Production stage
+FROM alpine:latest
 
-WORKDIR /app
+# Install ca-certificates for HTTPS requests
+RUN apk --no-cache add ca-certificates
 
-# Copy the built binary from the builder
-COPY --from=builder /app/server .
+WORKDIR /root/
 
-# Expose port (Cloud Run uses 8080 by default)
+# Copy the binary from builder stage
+COPY --from=builder /app/main .
+
+# Create non-root user for security
+RUN addgroup -g 1001 -S appgroup && \
+    adduser -u 1001 -S appuser -G appgroup
+
+# Change ownership of the binary
+RUN chown appuser:appgroup main
+
+# Switch to non-root user
+USER appuser
+
+# Expose port
 EXPOSE 8080
 
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:8080/api/player || exit 1
+
 # Run the binary
-CMD ["./server"]
+CMD ["./main"]

@@ -16,7 +16,7 @@ import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 const drawerWidth = 240;
 
 const navItems = [
-  { text: 'Home', icon: <HomeIcon />, link: "/home"  },
+  { text: 'Home', icon: <HomeIcon />, link: "/"  },
   { text: 'Fixtures', icon: <SportsSoccerIcon />, link: "/fixtures" },
   { text: 'Players', icon: <PersonIcon />, link: "/players" },
   { text: 'Teams', icon: <Groups2Icon />, link: "/teams" },
