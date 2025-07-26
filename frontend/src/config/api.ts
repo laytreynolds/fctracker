@@ -1,10 +1,10 @@
-// API configuration for different environments
+// API configuration using Vite environment variables
 const API_CONFIG = {
   development: {
-    baseURL: 'http://localhost:8080',
+    baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080',
   },
   production: {
-    baseURL: 'https://fctracker.laytonreynolds.com', 
+    baseURL: import.meta.env.VITE_API_BASE_URL || 'https://fctracker.laytonreynolds.com',
   },
 };
 
@@ -17,4 +17,11 @@ export const API_BASE_URL = API_CONFIG[environment as keyof typeof API_CONFIG]?.
 // Helper function to build full API URLs
 export const buildApiUrl = (endpoint: string): string => {
   return `${API_BASE_URL}${endpoint}`;
+};
+
+// App configuration
+export const APP_CONFIG = {
+  name: import.meta.env.VITE_APP_NAME || 'FC Tracker',
+  version: import.meta.env.VITE_APP_VERSION || '1.0.0',
+  environment: environment,
 };

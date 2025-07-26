@@ -1,0 +1,58 @@
+name: Deploy Backend to Cloud Run
+
+on:
+  push:
+    branches: [ main ]
+    paths: [ 'backend/**' ]
+  workflow_dispatch:
+
+env:
+  PROJECT_ID: your-gcp-project-id  # Replace with your actual project ID
+  SERVICE_NAME: fctracker-backend
+  REGION: us-central1
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Google Auth
+      id: auth
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+    - name: Set up Cloud SDK
+      uses: google-github-actions/setup-gcloud@v2
+
+    - name: Configure Docker
+      run: gcloud auth configure-docker
+
+    - name: Build and Deploy to Cloud Run
+      run: |
+        cd backend
+        gcloud run deploy ${{ env.SERVICE_NAME }} \
+          --source . \
+          --platform managed \
+          --region ${{ env.REGION }} \
+          --allow-unauthenticated \
+          --set-env-vars GIN_MODE=release,MONGODB_URI=${{ secrets.MONGODB_URI }},ALLOWED_ORIGINS=${{ secrets.ALLOWED_ORIGINS }} \
+          --project ${{ env.PROJECT_ID }}
+
+    - name: Get Service URL
+      id: service-url
+      run: |
+        SERVICE_URL=$(gcloud run services describe ${{ env.SERVICE_NAME }} \
+          --platform managed \
+          --region ${{ env.REGION }} \
+          --project ${{ env.PROJECT_ID }} \
+          --format 'value(status.url)')
+        echo "service_url=$SERVICE_URL" >> $GITHUB_OUTPUT
+
+    - name: Test Deployment
+      run: |
+        echo "Testing service at: ${{ steps.service-url.outputs.service_url }}"
+        curl -f ${{ steps.service-url.outputs.service_url }}/health || exit 1 
