@@ -24,6 +24,12 @@ export interface TTeam {
   Created: string;
 }
 
+// Location interface
+export interface TLocation {
+  Latitude: number;
+  Longitude: number;
+}
+
 // Fixture interface (matches backend fields)
 export interface TFixture {
   ID: string;
@@ -32,6 +38,9 @@ export interface TFixture {
   AwayTeam: string;
   HomeScore: string;
   AwayScore: string;
-  ManOfTheMatchName: string;
+  ManOfTheMatchName?: string;
+  GoalScorersNames?: string[];
+  AssistScorersNames?: string[];
+  Location?: TLocation;
 }
 

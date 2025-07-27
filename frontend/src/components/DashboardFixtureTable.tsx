@@ -8,9 +8,11 @@ import {
   TableRow,
   Paper,
   TablePagination,
+  Button,
 } from '@mui/material';
 import type { TFixture } from '@/types/types';
 import { buildApiUrl } from '@/config/api';
+import { useNavigate } from 'react-router-dom';
 
 export default function DashboardFixtureTable({ page, rowsPerPage, onPageChange, onRowsPerPageChange }: {
   page: number;
@@ -19,7 +21,7 @@ export default function DashboardFixtureTable({ page, rowsPerPage, onPageChange,
   onRowsPerPageChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }) {
   const [fixtures, setFixtures] = React.useState<TFixture[]>([]);
-
+  const navigate = useNavigate();
   useEffect(() => {
     fetch(buildApiUrl('/api/leaderboard/fixtures')).then(res => res.json()).then(data => setFixtures(data.fixtures || []));
   }, []);
@@ -34,8 +36,9 @@ export default function DashboardFixtureTable({ page, rowsPerPage, onPageChange,
               <TableCell>Teams</TableCell>
               <TableCell>Score</TableCell>
               <TableCell>Man of the Match</TableCell>
+              <TableCell /> {/* Details button header */}
             </TableRow>
-          </TableHead>
+          </TableHead>  
           <TableBody>
             {fixtures.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((fixture) => (
               <TableRow key={fixture.ID}>
@@ -43,6 +46,15 @@ export default function DashboardFixtureTable({ page, rowsPerPage, onPageChange,
                 <TableCell>{fixture.HomeTeam} v {fixture.AwayTeam}</TableCell>
                 <TableCell>{fixture.HomeScore} - {fixture.AwayScore}</TableCell>
                 <TableCell>{fixture.ManOfTheMatchName ?? '-'}</TableCell>
+                <TableCell>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    onClick={() => navigate(`/fixtures/${fixture.ID}`)}
+                  >
+                    Details
+                  </Button>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>

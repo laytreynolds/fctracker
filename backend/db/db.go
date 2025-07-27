@@ -277,7 +277,7 @@ func GetTeamByName(name string) (Team, error) {
 	return result, nil
 }
 
-func AddFixture(date, homeTeam, awayTeam, homeScore, awayScore, manOfTheMatch string) (Fixture, error) {
+func AddFixture(date, homeTeam, awayTeam, homeScore, awayScore, manOfTheMatch, latitude, longitude string) (Fixture, error) {
 	var result Fixture
 
 	coll := client.Database(db).Collection(fixtures)
@@ -288,6 +288,20 @@ func AddFixture(date, homeTeam, awayTeam, homeScore, awayScore, manOfTheMatch st
 	}
 
 	result = newFixture(date, homeTeam, awayTeam, homeScore, awayScore, motmId)
+
+	// Add location if coordinates are provided
+	if latitude != "" && longitude != "" {
+		lat, err := strconv.ParseFloat(latitude, 64)
+		if err == nil {
+			lon, err := strconv.ParseFloat(longitude, 64)
+			if err == nil {
+				result.Location = Location{
+					Latitude:  lat,
+					Longitude: lon,
+				}
+			}
+		}
+	}
 
 	_, err = coll.InsertOne(context.TODO(), result)
 	if err != nil {

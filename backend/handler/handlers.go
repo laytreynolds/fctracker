@@ -173,8 +173,10 @@ func addFixture(c *gin.Context) {
 	homeScore := c.Query("homeScore")
 	awayScore := c.Query("awayScore")
 	manOfMatch := c.Query("manOfTheMatch")
+	latitude := c.Query("latitude")
+	longitude := c.Query("longitude")
 
-	fixture, err := db.AddFixture(date, homeTeam, awayTeam, homeScore, awayScore, manOfMatch)
+	fixture, err := db.AddFixture(date, homeTeam, awayTeam, homeScore, awayScore, manOfMatch, latitude, longitude)
 	if err != nil {
 		if err != nil {
 			c.JSON(http.StatusOK, gin.H{"mesage": "error adding fixture", "error": err})

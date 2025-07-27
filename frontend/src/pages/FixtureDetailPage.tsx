@@ -15,24 +15,15 @@ import {
 import EditIcon from '@mui/icons-material/Edit';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import AddGoalscorerDialogue from '@/components/AddGoalScorerDialogue';
+import FixtureDetailMap from '@/components/FixtureDetailMap';
 import { buildApiUrl } from '@/config/api';
 
-// Define a minimal Fixture type for now
-interface Fixture {
-  ID: string;
-  Date: string;
-  HomeTeam: string;
-  AwayTeam: string;
-  HomeScore: string;
-  AwayScore: string;
-  ManOfTheMatchName?: string;
-  GoalScorersNames?: string[];
-  AssistScorersNames?: string[];
-}
+// Use the TFixture type from types.tsx
+import type { TFixture } from '@/types/types';
 
 export default function FixtureDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const [fixture, setFixture] = React.useState<Fixture | null>(null);
+  const [fixture, setFixture] = React.useState<TFixture | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const [addGoalOpen, setAddGoalOpen] = React.useState(false);
@@ -89,7 +80,7 @@ export default function FixtureDetailPage() {
                 {fixture.HomeTeam} vs {fixture.AwayTeam}
               </Typography>
               <Typography variant="subtitle1" color="text.secondary">
-                {fixture.Date}
+                Date: {fixture.Date}
               </Typography>
             </Box>
             <Box>
@@ -122,6 +113,17 @@ export default function FixtureDetailPage() {
           </Stack>
         </CardContent>
       </Card>
+
+      {/* Map Section */}
+      <Card sx={{ borderRadius: 4, mb: 3 }}>
+        <CardContent>
+          <Typography variant="h6" fontWeight={600} gutterBottom>
+            Fixture Location
+          </Typography>
+          <FixtureDetailMap fixture={fixture} />
+        </CardContent>
+      </Card>
+
       <Grid container spacing={2}>
         <Grid size={4}>
           <Card sx={{ borderRadius: 4 }}>
