@@ -6,14 +6,16 @@ import {
   DialogActions,
   Button,
   TextField,
-  Stack,
   FormControl,
   InputLabel,
   Select,
   MenuItem,
+  Box,
+  Alert,
 } from '@mui/material';
 import type { TPlayer, TTeam } from '@/types/types';
 import { buildApiUrl } from '@/config/api';
+import { postcodeToCoordinates } from '@/utils/geocoding';
 
 interface AddFixtureDialogProps {
   open: boolean;
@@ -28,9 +30,11 @@ export default function AddFixtureDialog({ open, onClose, onSuccess }: AddFixtur
   const [homeScore, setHomeScore] = useState('');
   const [awayScore, setAwayScore] = useState('');
   const [manOfTheMatch, setManOfTheMatch] = useState('');
+  const [postcode, setPostcode] = useState('');
   const [players, setPlayers] = useState<TPlayer[]>([]);
   const [teams, setTeams] = useState<TTeam[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  const [geocodingError, setGeocodingError] = useState<string | null>(null);
 
   useEffect(() => {
     if (open) {
@@ -55,8 +59,20 @@ export default function AddFixtureDialog({ open, onClose, onSuccess }: AddFixtur
     }
 
     setSubmitting(true);
+    setGeocodingError(null);
 
     try {
+      // Convert postcode to coordinates if provided
+      let coordinates = null;
+      if (postcode.trim()) {
+        coordinates = await postcodeToCoordinates(postcode.trim());
+        if (!coordinates) {
+          setGeocodingError('Could not find coordinates for the provided postcode');
+          setSubmitting(false);
+          return;
+        }
+      }
+
       const params = new URLSearchParams({
         date,
         homeTeam,
@@ -65,6 +81,12 @@ export default function AddFixtureDialog({ open, onClose, onSuccess }: AddFixtur
         awayScore,
         manOfTheMatch,
       });
+
+      // Add coordinates to params if available
+      if (coordinates) {
+        params.append('latitude', coordinates.latitude.toString());
+        params.append('longitude', coordinates.longitude.toString());
+      }
 
       const response = await fetch(buildApiUrl(`/api/fixture/add?${params.toString()}`), {
         method: 'POST',
@@ -80,6 +102,7 @@ export default function AddFixtureDialog({ open, onClose, onSuccess }: AddFixtur
         setHomeScore('');
         setAwayScore('');
         setManOfTheMatch('');
+        setPostcode('');
         onClose();
         if (onSuccess) onSuccess();
       } else {
@@ -101,6 +124,8 @@ export default function AddFixtureDialog({ open, onClose, onSuccess }: AddFixtur
       setHomeScore('');
       setAwayScore('');
       setManOfTheMatch('');
+      setPostcode('');
+      setGeocodingError(null);
       onClose();
     }
   };
@@ -109,23 +134,19 @@ export default function AddFixtureDialog({ open, onClose, onSuccess }: AddFixtur
     <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
       <DialogTitle>Add New Fixture</DialogTitle>
       <DialogContent>
-        <Stack spacing={2} sx={{ mt: 1 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
           <TextField
             label="Date"
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            fullWidth
-            required
             InputLabelProps={{ shrink: true }}
+            required
           />
+          
           <FormControl fullWidth required>
             <InputLabel>Home Team</InputLabel>
-            <Select
-              value={homeTeam}
-              label="Home Team"
-              onChange={(e) => setHomeTeam(e.target.value)}
-            >
+            <Select value={homeTeam} onChange={(e) => setHomeTeam(e.target.value)}>
               {teams.map((team) => (
                 <MenuItem key={team.ID} value={team.Name}>
                   {team.Name}
@@ -133,13 +154,10 @@ export default function AddFixtureDialog({ open, onClose, onSuccess }: AddFixtur
               ))}
             </Select>
           </FormControl>
+
           <FormControl fullWidth required>
             <InputLabel>Away Team</InputLabel>
-            <Select
-              value={awayTeam}
-              label="Away Team"
-              onChange={(e) => setAwayTeam(e.target.value)}
-            >
+            <Select value={awayTeam} onChange={(e) => setAwayTeam(e.target.value)}>
               {teams.map((team) => (
                 <MenuItem key={team.ID} value={team.Name}>
                   {team.Name}
@@ -147,39 +165,51 @@ export default function AddFixtureDialog({ open, onClose, onSuccess }: AddFixtur
               ))}
             </Select>
           </FormControl>
-          <Stack direction="row" spacing={2}>
+
+          <Box sx={{ display: 'flex', gap: 2 }}>
             <TextField
               label="Home Score"
               type="number"
               value={homeScore}
               onChange={(e) => setHomeScore(e.target.value)}
-              fullWidth
               required
+              fullWidth
             />
             <TextField
               label="Away Score"
               type="number"
               value={awayScore}
               onChange={(e) => setAwayScore(e.target.value)}
-              fullWidth
               required
+              fullWidth
             />
-          </Stack>
+          </Box>
+
           <FormControl fullWidth>
             <InputLabel>Man of the Match</InputLabel>
-            <Select
-              value={manOfTheMatch}
-              label="Man of the Match"
-              onChange={(e) => setManOfTheMatch(e.target.value)}
-            >
+            <Select value={manOfTheMatch} onChange={(e) => setManOfTheMatch(e.target.value)}>
               {players.map((player) => (
-                <MenuItem key={player.ID} value={player.Name}>
+                <MenuItem key={player.ID} value={player.ID}>
                   {player.Name} ({player.Position})
                 </MenuItem>
               ))}
             </Select>
           </FormControl>
-        </Stack>
+
+          <TextField
+            label="Postcode (optional)"
+            value={postcode}
+            onChange={(e) => setPostcode(e.target.value)}
+            placeholder="e.g., SW1A 1AA"
+            helperText="Enter a UK postcode to automatically set the fixture location"
+          />
+
+          {geocodingError && (
+            <Alert severity="error" sx={{ mt: 1 }}>
+              {geocodingError}
+            </Alert>
+          )}
+        </Box>
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose} disabled={submitting}>

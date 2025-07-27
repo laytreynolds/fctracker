@@ -15,6 +15,7 @@ export default function Home() {
       <Typography variant="h4" sx={{ mb: 3, fontWeight: 700 }}>Dashboard</Typography>
         <Leaderboard />
         <Box sx={{ mx: 'auto', mt: 2 }}>
+          <Typography variant="h6" sx={{ mb: 3, fontWeight: 700 }}>Last 5 Fixtures</Typography>
         <DashboardFixtureTable
           page={page}
           rowsPerPage={rowsPerPage}

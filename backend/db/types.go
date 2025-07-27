@@ -49,6 +49,12 @@ type Fixture struct {
 	GoalScorersNames   []string        `bson:"goal_scorers_names,omitempty"`
 	AssistScorers      []bson.ObjectID `bson:"assist_scorers,omitempty"`
 	AssistScorersNames []string        `bson:"assist_scorers_names,omitempty"`
+	Location           Location        `bson:"location,omitempty"`
+}
+
+type Location struct {
+	Latitude  float64 `bson:"latitude,omitempty"`
+	Longitude float64 `bson:"longitude,omitempty"`
 }
 
 // In db/types.go or db/db.go
