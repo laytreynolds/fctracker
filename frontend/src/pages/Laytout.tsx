@@ -4,7 +4,7 @@ import { Outlet, Link, useLocation } from 'react-router-dom';
 
 import {
   Box, CssBaseline, AppBar, Toolbar, Typography, IconButton, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText,
-  Divider, Avatar, Menu, MenuItem, Switch, useTheme, useMediaQuery, Button
+  Divider, Switch, useTheme, useMediaQuery
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import HomeIcon from '@mui/icons-material/Home';
@@ -12,7 +12,7 @@ import SportsSoccerIcon from '@mui/icons-material/SportsSoccer';
 import PersonIcon from '@mui/icons-material/Person';import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
 import Groups2Icon from '@mui/icons-material/Groups2';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+// import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 const drawerWidth = 240;
 
 const navItems = [
@@ -26,28 +26,28 @@ interface LayoutProps {
   setDarkMode: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-function getDate() {
-  const today = new Date();
-  const month = today.getMonth() + 1;
-  const year = today.getFullYear();
-  const date = today.getDate();
-  return `${date}/${month}/${year}`;
-}
+// function getDate() {
+//  const today = new Date();
+//  const month = today.getMonth() + 1;
+//  const year = today.getFullYear();
+//  const date = today.getDate();
+//  return `${date}/${month}/${year}`;
+//}
 
 export default function Layout({ darkMode, setDarkMode }: LayoutProps) {
   const theme = useTheme();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = React.useState(false);
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-  const isMenuOpen = Boolean(anchorEl);
+  // const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  // const isMenuOpen = Boolean(anchorEl);
   const isMdUp = useMediaQuery(theme.breakpoints.up('md'));
 
   const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
-  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => setAnchorEl(event.currentTarget);
-  const handleMenuClose = () => setAnchorEl(null);
+ // const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => setAnchorEl(event.currentTarget);
+// const handleMenuClose = () => setAnchorEl(null);
   const handleDarkModeToggle = () => setDarkMode((prev: boolean) => !prev);
 
-  const [currentDate] = React.useState(getDate());
+  // const [currentDate] = React.useState(getDate());
 
 
   const drawer = (
