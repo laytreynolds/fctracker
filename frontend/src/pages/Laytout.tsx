@@ -83,10 +83,10 @@ export default function Layout({ darkMode, setDarkMode }: LayoutProps) {
           )}
           {/* Date */}
           <Box sx={{ flexGrow: 1 }} />
-          <Button startIcon={<CalendarTodayIcon />} sx={{ color: 'text.secondary', mr: 2 }}>
-          {currentDate}
-          </Button>
-          {/* User Avatar and Menu */}
+
+
+          {/*
+          // User Avatar and Menu
           <IconButton color="inherit" onClick={handleMenuOpen} sx={{ mr: 2 }}>
             <Avatar src="/user-avatar.jpg" />
           </IconButton>
@@ -95,6 +95,8 @@ export default function Layout({ darkMode, setDarkMode }: LayoutProps) {
             <MenuItem onClick={handleMenuClose}>Settings</MenuItem>
             <MenuItem onClick={handleMenuClose}>Logout</MenuItem>
           </Menu>
+          */}
+
           {/* Dark Mode Toggle */}
           <IconButton color="inherit" onClick={handleDarkModeToggle}>
             {darkMode ? <Brightness7Icon /> : <Brightness4Icon />}

@@ -29,14 +29,13 @@ func Start() {
 	}
 
 	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
 
-	// Parse allowed origins from environment variable with fallbacks
-	allowedOrigins := []string{"https://fctracker-laytreynolds-projects.vercel.app", "http://localhost:3000"}
-
+	allowedOrigins := []string{"http://localhost:5173"}
 	if envOrigins := os.Getenv("ALLOWED_ORIGINS"); envOrigins != "" {
-		// Split by comma if multiple origins are provided
 		origins := strings.Split(envOrigins, ",")
-		// Trim whitespace from each origin
 		for i, origin := range origins {
 			origins[i] = strings.TrimSpace(origin)
 		}
