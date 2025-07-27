@@ -12,7 +12,6 @@ export default function PlayersPage() {
     const [page, setPage] = React.useState(0);
     const [rowsPerPage, setRowsPerPage] = React.useState(5);
     const [open, setOpen] = React.useState(false);
-    const [refresh, setRefresh] = React.useState(0);
   
   
     const handleChangePage = (_: unknown, newPage: number) => {
@@ -29,7 +28,7 @@ export default function PlayersPage() {
   
     const handleSuccess = () => {
       handleClose();
-      setRefresh((prev) => prev + 1);
+      // TeamTable now manages its own data fetching, so no need to trigger refresh
     };
   
     return (
@@ -45,7 +44,6 @@ export default function PlayersPage() {
           rowsPerPage={rowsPerPage}
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
-          refresh={refresh}
           />
         <AddTeamDialogue open={open} onClose={handleClose} onSuccess={handleSuccess} />
       </Box>

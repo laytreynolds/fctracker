@@ -12,8 +12,6 @@ export default function PlayersPage() {
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
   const [open, setOpen] = React.useState(false);
-  const [refresh, setRefresh] = React.useState(0);
-
 
   const handleChangePage = (_: unknown, newPage: number) => {
     setPage(newPage);
@@ -29,7 +27,7 @@ export default function PlayersPage() {
 
   const handleSuccess = () => {
     handleClose();
-    setRefresh((prev) => prev + 1);
+    // PlayerTable now manages its own data fetching, so no need to trigger refresh
   };
 
   return (
