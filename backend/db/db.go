@@ -8,7 +8,6 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
@@ -28,10 +27,8 @@ const (
 
 func Connect() {
 
-	// load env
-	if err := godotenv.Load(); err != nil {
-		log.Fatalf("error loading env: %s", err)
-	}
+	// Environment variables are set directly in Cloud Run
+	// No need to load .env file in production
 
 	uri := os.Getenv("MONGODB_URI")
 
