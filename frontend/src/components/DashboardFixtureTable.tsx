@@ -50,7 +50,7 @@ export default function DashboardFixtureTable({ page, rowsPerPage, onPageChange,
                   <Button
                     variant="outlined"
                     size="small"
-                    onClick={() => navigate(`/fixtures/${fixture.ID}`)}
+                    onClick={() => navigate(`/fixture/${fixture.ID}`)}
                   >
                     Details
                   </Button>
