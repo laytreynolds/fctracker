@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
     Grid, Card, CardContent, Typography, List, ListItem, Stack
   } from '@mui/material';
@@ -7,6 +7,7 @@ import SportsSoccerIcon from '@mui/icons-material/SportsSoccer'; // Goal
 import TrackChangesIcon from '@mui/icons-material/TrackChanges'; // Target (Assists)
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';   // Trophy (MOTM)
 import type { TPlayer } from '@/types/types';
+import { buildApiUrl } from '@/config/api';
 
 export default function Leaderboard(){
     
@@ -15,10 +16,10 @@ export default function Leaderboard(){
   const [motm, setMotm] = React.useState<TPlayer[]>([]);
 
    // Fetch leaderboards
-   React.useEffect(() => {
-    fetch('http://localhost:8080/api/leaderboard/goals').then(res => res.json()).then(data => setGoals(data.players || []));
-    fetch('http://localhost:8080/api/leaderboard/assists').then(res => res.json()).then(data => setAssists(data.players || []));
-    fetch('http://localhost:8080/api/leaderboard/motm').then(res => res.json()).then(data => setMotm(data.players || []));
+   useEffect(() => {
+    fetch(buildApiUrl('/api/leaderboard/goals')).then(res => res.json()).then(data => setGoals(data.players || []));
+    fetch(buildApiUrl('/api/leaderboard/assists')).then(res => res.json()).then(data => setAssists(data.players || []));
+    fetch(buildApiUrl('/api/leaderboard/motm')).then(res => res.json()).then(data => setMotm(data.players || []));
   }, []);
     
     return (

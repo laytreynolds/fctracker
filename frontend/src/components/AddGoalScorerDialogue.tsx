@@ -1,60 +1,102 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
-  Dialog, DialogTitle, DialogContent, DialogActions,
-  Button, List, ListItem, ListItemButton, ListItemText, CircularProgress
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from '@mui/material';
 import type { TPlayer } from '@/types/types';
+import { buildApiUrl } from '@/config/api';
 
-export default function AddGoalscorerDialogue({ open, onClose, fixtureId }: {
+export default function AddGoalscorerDialogue({ open, onClose, fixtureId, onSuccess }: {
   open: boolean;
   onClose: () => void;
   fixtureId: string;
+  onSuccess?: () => void;
 }) {
-  const [players, setPlayers] = React.useState<TPlayer[]>([]);
-  const [loading, setLoading] = React.useState(true);
+  const [players, setPlayers] = useState<TPlayer[]>([]);
+  const [selectedPlayerId, setSelectedPlayerId] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (open) {
-      setLoading(true);
-      fetch('http://localhost:8080/api/player')
+      fetch(buildApiUrl('/api/player'))
         .then(res => res.json())
-        .then(data => {
-          setPlayers(data.players || []);
-          setLoading(false);
-        });
+        .then(data => setPlayers(data.players || []))
+        .catch(error => console.error('Error fetching players:', error));
     }
   }, [open]);
 
-  const handleAddGoalSubmit = (playerId: string) => {
-    // Call your backend to update the fixture
-    fetch(`http://localhost:8080/api/fixture/addgoalscorer?fixtureId=${fixtureId}&playerId=${playerId}`, {
+  const handleSubmit = (playerId: string) => {
+    setSubmitting(true);
+    
+    fetch(buildApiUrl(`/api/fixture/addgoalscorer?fixtureId=${fixtureId}&playerId=${playerId}`), {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fixtureId: fixtureId, playerId }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
     })
-      .then(res => res.json())
+    .then(res => res.json())
+    .then(data => {
+      if (data.error) {
+        alert(`Error: ${data.error}`);
+      } else {
+        setSelectedPlayerId('');
+        onClose();
+        if (onSuccess) onSuccess();
+      }
+    })
+    .catch(error => {
+      console.error('Error adding goalscorer:', error);
+      alert('Failed to add goalscorer');
+    })
+    .finally(() => {
+      setSubmitting(false);
+    });
   };
-  
+
+  const handleClose = () => {
+    if (!submitting) {
+      setSelectedPlayerId('');
+      onClose();
+    }
+  };
+
   return (
-    <Dialog open={open} onClose={onClose} fullWidth>
-      <DialogTitle>Select Goalscorer</DialogTitle>
+    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
+      <DialogTitle>Add Goal Scorer</DialogTitle>
       <DialogContent>
-        {loading ? (
-          <CircularProgress />
-        ) : (
-          <List>
-            {players.map(player => (
-              <ListItem key={player.ID} disablePadding>
-                <ListItemButton onClick={() => handleAddGoalSubmit(player.ID)}>
-                  <ListItemText primary={player.Name} />
-                </ListItemButton>
-              </ListItem>
+        <FormControl fullWidth sx={{ mt: 2 }}>
+          <InputLabel>Select Player</InputLabel>
+          <Select
+            value={selectedPlayerId}
+            label="Select Player"
+            onChange={(e) => setSelectedPlayerId(e.target.value)}
+          >
+            {players.map((player) => (
+              <MenuItem key={player.ID} value={player.ID}>
+                {player.Name} ({player.Position})
+              </MenuItem>
             ))}
-          </List>
-        )}
+          </Select>
+        </FormControl>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
+        <Button onClick={handleClose} disabled={submitting}>
+          Cancel
+        </Button>
+        <Button 
+          onClick={() => handleSubmit(selectedPlayerId)} 
+          variant="contained" 
+          disabled={!selectedPlayerId || submitting}
+        >
+          {submitting ? 'Adding...' : 'Add Goal'}
+        </Button>
       </DialogActions>
     </Dialog>
   );

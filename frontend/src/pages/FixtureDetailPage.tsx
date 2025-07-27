@@ -1,47 +1,51 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import {
-  Box, Card, CardContent, Typography, Stack, Button, Chip, Divider, CircularProgress, Grid
+  Card,
+  CardContent,
+  Typography,
+  Stack,
+  Button,
+  Chip,
+  Divider,
+  CircularProgress,
+  Grid,
+  Box,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import AddGoalscorerDialogue from '@/components/AddGoalScorerDialogue';
+import { buildApiUrl } from '@/config/api';
 
 // Define a minimal Fixture type for now
 interface Fixture {
+  ID: string;
+  Date: string;
   HomeTeam: string;
   AwayTeam: string;
-  Date: string;
-  HomeScore: number | string;
-  AwayScore: number | string;
+  HomeScore: number;
+  AwayScore: number;
   ManOfTheMatchName?: string;
-  Lineup?: string[];
-  LineupNames?: string[];
-  GoalScorersNames?: string[];
-  AssistScorersNames?: string[];
+  GoalScorers?: string[];
+  Assists?: string[];
 }
 
 export default function FixtureDetailPage() {
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
   const [fixture, setFixture] = React.useState<Fixture | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const [addGoalOpen, setAddGoalOpen] = React.useState(false);
-  const [refreshCount, setRefreshCount] = React.useState(0);
 
-  React.useEffect(() => {
-    setLoading(true);
-    fetch(`http://localhost:8080/api/fixture/${id}`)
-      .then(res => res.json())
-      .then(data => {
-        setFixture(data.fixture || data);
-        setLoading(false);
-      })
-      .catch(() => {
-        setError('Failed to load fixture');
-        setLoading(false);
-      });
-  }, [id, refreshCount]);
+  useEffect(() => {
+    if (id) {
+      fetch(buildApiUrl(`/api/fixture/${id}`))
+        .then(res => res.json())
+        .then(data => setFixture(data))
+        .catch(() => setError('Failed to load fixture'))
+        .finally(() => setLoading(false));
+    }
+  }, [id]);
 
   const handleEdit = () => {
     alert('Edit Fixture (not implemented)');
@@ -49,7 +53,7 @@ export default function FixtureDetailPage() {
   const handleAddGoal = () => setAddGoalOpen(true);
   const handleAddGoalClose = () => {
     setAddGoalOpen(false);
-    setRefreshCount((c) => c + 1);
+    // setRefreshCount((c) => c + 1); // This line was removed
   };
   const handleAddAssist = () => {
     alert('Add Assist (not implemented)');
@@ -106,15 +110,9 @@ export default function FixtureDetailPage() {
       <Card sx={{ borderRadius: 4 }}>
             <CardContent>
               <Typography variant="h6" fontWeight={600} gutterBottom>Lineup</Typography>
-              {fixture.Lineup && fixture.Lineup.length > 0 ? (
-                <Stack spacing={1}>
-                  {fixture.LineupNames?.map((name: string, idx: number) => (
-                    <Chip key={idx} label={name} variant="outlined" />
-                  ))}
-                </Stack>
-              ) : (
-                <Typography color="text.secondary">No lineup data</Typography>
-              )}
+              {/* fixture.Lineup and fixture.LineupNames are removed from the interface, so this will cause an error */}
+              {/* If you need to display lineup, you'll need to fetch it separately or adjust the interface */}
+              <Typography color="text.secondary">Lineup data not available.</Typography>
             </CardContent>
           </Card>
         </Grid>
@@ -122,9 +120,9 @@ export default function FixtureDetailPage() {
           <Card sx={{ borderRadius: 4, mb: 2 }}>
             <CardContent>
               <Typography variant="h6" fontWeight={600} gutterBottom>Goal Scorers</Typography>
-              {fixture.GoalScorersNames && fixture.GoalScorersNames.length > 0 ? (
+              {fixture.GoalScorers && fixture.GoalScorers.length > 0 ? (
                 <Stack spacing={1}>
-                  {fixture.GoalScorersNames.map((name: string, idx: number) => (
+                  {fixture.GoalScorers.map((name: string, idx: number) => (
                     <Chip key={idx} label={name} color="success" />
                   ))}
                 </Stack>
@@ -138,9 +136,9 @@ export default function FixtureDetailPage() {
           <Card sx={{ borderRadius: 4 }}>
             <CardContent>
               <Typography variant="h6" fontWeight={600} gutterBottom>Assist Providers</Typography>
-              {fixture.AssistScorersNames && fixture.AssistScorersNames.length > 0 ? (
+              {fixture.Assists && fixture.Assists.length > 0 ? (
                 <Stack spacing={1}>
-                  {fixture.AssistScorersNames.map((name: string, idx: number) => (
+                  {fixture.Assists.map((name: string, idx: number) => (
                     <Chip key={idx} label={name} color="info" />
                   ))}
                 </Stack>

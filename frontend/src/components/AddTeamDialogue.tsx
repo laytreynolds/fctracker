@@ -1,98 +1,111 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
+  Button,
   TextField,
   Stack,
-  Button,
 } from '@mui/material';
+import { buildApiUrl } from '@/config/api';
 
-// Component Props
-interface AddFixtureDialogProps {
+interface AddTeamDialogueProps {
   open: boolean;
   onClose: () => void;
-  onSuccess: () => void;
+  onSuccess?: () => void;
 }
 
-export default function AddFixtureDialog({ open, onClose, onSuccess }: AddFixtureDialogProps) {
-  // State for form inputs
-  const [form, setForm] = React.useState({
-    name: '',
-    coach: '',
-    founded: '',
-  });
+export default function AddTeamDialogue({ open, onClose, onSuccess }: AddTeamDialogueProps) {
+  const [name, setName] = useState('');
+  const [coach, setCoach] = useState('');
+  const [founded, setFounded] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
-  // Handlers
-  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-  };
+  const handleSubmit = async () => {
+    if (!name || !coach || !founded) {
+      alert('Please fill in all fields');
+      return;
+    }
 
-  const resetForm = () => {
-    setForm({
-      name: '',
-      coach: '',
-      founded: '',
-    });
-  };
-
-  const handleCloseDialog = () => {
-    resetForm();
-    onClose();
-  };
-
-  const handleAddFixture = async () => {
-    const params = new URLSearchParams({
-      name: form.name,
-      coach: form.coach,
-      founded: form.founded,
-    });
+    setSubmitting(true);
 
     try {
-      // Note: You will need to create this backend endpoint
-      const response = await fetch(`http://localhost:8080/api/team/add?${params.toString()}`, {
-        method: 'POST',
+      const params = new URLSearchParams({
+        name,
+        coach,
+        founded,
       });
-      if (!response.ok) {
-        throw new Error('Failed to add fixture');
+
+      const response = await fetch(buildApiUrl(`/api/team/add?${params.toString()}`), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        setName('');
+        setCoach('');
+        setFounded('');
+        onClose();
+        if (onSuccess) onSuccess();
+      } else {
+        alert('Failed to add team');
       }
-      resetForm();
-      onSuccess();
     } catch (error) {
-      alert(`Error adding fixture: ${(error as Error).message}`);
+      console.error('Error adding team:', error);
+      alert('Failed to add team');
+    } finally {
+      setSubmitting(false);
     }
   };
-  
-  const isFormInvalid = !form.name || !form.coach || !form.founded;
+
+  const handleClose = () => {
+    if (!submitting) {
+      setName('');
+      setCoach('');
+      setFounded('');
+      onClose();
+    }
+  };
 
   return (
-    <Dialog open={open} onClose={handleCloseDialog}>
+    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
       <DialogTitle>Add New Team</DialogTitle>
       <DialogContent>
-        <Stack spacing={2} sx={{ mt: 1, minWidth: '400px' }}>
+        <Stack spacing={2} sx={{ mt: 1 }}>
           <TextField
             label="Team Name"
-            name="name"
-            type="string"
-            value={form.name}
-            onChange={handleFormChange}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
             fullWidth
             required
-            InputLabelProps={{
-              shrink: true,
-            }}
           />
-        <TextField label="Coach" name="coach" value={form.coach} onChange={handleFormChange} type="string" fullWidth required />
-        <TextField label="Founded" name="founded" value={form.founded} onChange={handleFormChange} type="string" fullWidth required />
-          </Stack>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog}>Cancel</Button>
-          <Button onClick={handleAddFixture} variant="contained" disabled={isFormInvalid}>
-            Add Fixture
-          </Button>
-        </DialogActions>
-      </Dialog>
-    );
+          <TextField
+            label="Coach"
+            value={coach}
+            onChange={(e) => setCoach(e.target.value)}
+            fullWidth
+            required
+          />
+          <TextField
+            label="Founded Year"
+            value={founded}
+            onChange={(e) => setFounded(e.target.value)}
+            fullWidth
+            required
+          />
+        </Stack>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={handleClose} disabled={submitting}>
+          Cancel
+        </Button>
+        <Button onClick={handleSubmit} variant="contained" disabled={submitting}>
+          {submitting ? 'Adding...' : 'Add Team'}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
 } 

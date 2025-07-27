@@ -4,7 +4,7 @@ const API_CONFIG = {
     baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080',
   },
   production: {
-    baseURL: import.meta.env.VITE_API_BASE_URL || 'https://fctracker.laytonreynolds.com',
+    baseURL: import.meta.env.VITE_API_BASE_URL || 'https://fctracker-backend-1055102418750.europe-west1.run.app',
   },
 };
 

@@ -1,10 +1,22 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
-Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TablePagination, Typography, Box, Stack, Button
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  TablePagination,
+  Button,
+  Box,
+  Stack,
+  Typography,
 } from '@mui/material';
 import type{ TFixture } from '@/types/types';
 import AddFixtureDialog from '@/components/AddFixtureDialog';
 import { useNavigate } from 'react-router-dom';
+import { buildApiUrl } from '@/config/api';
 
 
 export default function FixtureTable() {
@@ -31,16 +43,12 @@ export default function FixtureTable() {
 
   const handleSuccess = () => {
     handleClose();
-  // To refresh the fixtures table when the dialog closes, you need to trigger a re-fetch of the fixture data in the FixtureTable component.
-  // One common way is to use a "key" prop or a "refresh" state that you increment to force a re-render/re-fetch.
-  // Here, we'll add a "refresh" state and pass it to FixtureTable as a prop.
-
     setRefresh((prev) => prev + 1);
   };
 
    // Fetch Fixtures
-   React.useEffect(() => {
-    fetch('http://localhost:8080/api/fixture/getall').then(res => res.json()).then(data => setFixtures(data.fixtures || []));
+   useEffect(() => {
+    fetch(buildApiUrl('/api/fixture/getall')).then(res => res.json()).then(data => setFixtures(data.fixtures || []));
   }, [refresh]);
 
   return (       

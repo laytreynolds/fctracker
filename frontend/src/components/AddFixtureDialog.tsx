@@ -1,211 +1,194 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
+  Button,
   TextField,
+  Stack,
+  FormControl,
+  InputLabel,
   Select,
   MenuItem,
-  InputLabel,
-  FormControl,
-  Stack,
-  Button,
 } from '@mui/material';
-import type { SelectChangeEvent } from '@mui/material';
+import type { TPlayer, TTeam } from '@/types/types';
+import { buildApiUrl } from '@/config/api';
 
-// Interfaces for fetched data
-interface Player {
-  id: string;
-  name: string;
-}
-
-interface Team {
-  id: string;
-  name: string;
-}
-
-// Component Props
 interface AddFixtureDialogProps {
   open: boolean;
   onClose: () => void;
-  onSuccess: () => void;
+  onSuccess?: () => void;
 }
 
 export default function AddFixtureDialog({ open, onClose, onSuccess }: AddFixtureDialogProps) {
-  // State for form inputs
-  const [form, setForm] = React.useState({
-    date: '',
-    homeTeam: '',
-    awayTeam: '',
-    homeScore: '',
-    awayScore: '',
-    manOfTheMatch: '', // This will be the player's ID
-  });
+  const [date, setDate] = useState('');
+  const [homeTeam, setHomeTeam] = useState('');
+  const [awayTeam, setAwayTeam] = useState('');
+  const [homeScore, setHomeScore] = useState('');
+  const [awayScore, setAwayScore] = useState('');
+  const [manOfTheMatch, setManOfTheMatch] = useState('');
+  const [players, setPlayers] = useState<TPlayer[]>([]);
+  const [teams, setTeams] = useState<TTeam[]>([]);
+  const [submitting, setSubmitting] = useState(false);
 
-  // State for dropdown data
-  const [players, setPlayers] = React.useState<Player[]>([]);
-  const [teams, setTeams] = React.useState<Team[]>([]);
-
-  // Fetch players for Man of the Match dropdown
-  const fetchPlayers = React.useCallback(async () => {
-    try {
-      const response = await fetch('http://localhost:8080/api/player');
-      if (!response.ok) throw new Error('Failed to fetch players');
-      const data = await response.json();
-      if (data.players) {
-        const fetchedPlayers: Player[] = data.players
-          .map((p: { ID: string; Name: string }) => ({
-            id: p.ID,
-            name: p.Name,
-          }));
-        setPlayers(fetchedPlayers);
-      }
-    } catch (error) {
-      console.error('Fetch players error:', error);
-      alert('Failed to load players for dropdown.');
-    }
-  }, []);
-
-  // Fetch teams for Home/Away team dropdowns
-  const fetchTeams = React.useCallback(async () => {
-    try {
-      const response = await fetch('http://localhost:8080/api/team/getall');
-      if (!response.ok) throw new Error('Failed to fetch teams');
-      const data = await response.json();
-      if (data.teams) {
-        const fetchedTeams: Team[] = data.teams
-          .map((t: { _id: string; Name: string }) => ({
-            id: t._id,
-            name: t.Name,
-          }));
-        setTeams(fetchedTeams);
-      }
-    } catch (error) {
-      console.error('Fetch teams error:', error);
-      alert('Failed to load teams for dropdowns.');
-    }
-  }, []);
-
-  // Fetch data when dialog opens
-  React.useEffect(() => {
+  useEffect(() => {
     if (open) {
-      fetchPlayers();
-      fetchTeams();
+      // Fetch players for Man of the Match selection
+      fetch(buildApiUrl('/api/player'))
+        .then(res => res.json())
+        .then(data => setPlayers(data.players || []))
+        .catch(error => console.error('Error fetching players:', error));
+
+      // Fetch teams
+      fetch(buildApiUrl('/api/team/getall'))
+        .then(res => res.json())
+        .then(data => setTeams(data.teams || []))
+        .catch(error => console.error('Error fetching teams:', error));
     }
-  }, [open, fetchPlayers, fetchTeams]);
+  }, [open]);
 
-  // Handlers
-  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-  };
-  
-  const handleSelectChange = (event: SelectChangeEvent) => {
-    const { name, value } = event.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
-  };
+  const handleSubmit = async () => {
+    if (!date || !homeTeam || !awayTeam || !homeScore || !awayScore) {
+      alert('Please fill in all required fields');
+      return;
+    }
 
-  const resetForm = () => {
-    setForm({
-      date: '',
-      homeTeam: '',
-      awayTeam: '',
-      homeScore: '',
-      awayScore: '',
-      manOfTheMatch: '',
-    });
-  };
-
-  const handleCloseDialog = () => {
-    resetForm();
-    onClose();
-  };
-
-  const handleAddFixture = async () => {
-    const params = new URLSearchParams({
-      date: form.date,
-      homeTeam: form.homeTeam,
-      awayTeam: form.awayTeam,
-      homeScore: form.homeScore,
-      awayScore: form.awayScore,
-      manOfTheMatch: form.manOfTheMatch,
-    });
+    setSubmitting(true);
 
     try {
-      // Note: You will need to create this backend endpoint
-      const response = await fetch(`http://localhost:8080/api/fixture/add?${params.toString()}`, {
-        method: 'POST',
+      const params = new URLSearchParams({
+        date,
+        homeTeam,
+        awayTeam,
+        homeScore,
+        awayScore,
+        manOfTheMatch,
       });
-      if (!response.ok) {
-        throw new Error('Failed to add fixture');
+
+      const response = await fetch(buildApiUrl(`/api/fixture/add?${params.toString()}`), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        setDate('');
+        setHomeTeam('');
+        setAwayTeam('');
+        setHomeScore('');
+        setAwayScore('');
+        setManOfTheMatch('');
+        onClose();
+        if (onSuccess) onSuccess();
+      } else {
+        alert('Failed to add fixture');
       }
-      resetForm();
-      onSuccess();
     } catch (error) {
-      alert(`Error adding fixture: ${(error as Error).message}`);
+      console.error('Error adding fixture:', error);
+      alert('Failed to add fixture');
+    } finally {
+      setSubmitting(false);
     }
   };
-  
-  const isFormInvalid = !form.date || !form.homeTeam || !form.awayTeam || form.homeScore === '' || form.awayScore === '';
+
+  const handleClose = () => {
+    if (!submitting) {
+      setDate('');
+      setHomeTeam('');
+      setAwayTeam('');
+      setHomeScore('');
+      setAwayScore('');
+      setManOfTheMatch('');
+      onClose();
+    }
+  };
 
   return (
-    <Dialog open={open} onClose={handleCloseDialog}>
+    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
       <DialogTitle>Add New Fixture</DialogTitle>
       <DialogContent>
-        <Stack spacing={2} sx={{ mt: 1, minWidth: '500px' }}>
+        <Stack spacing={2} sx={{ mt: 1 }}>
           <TextField
-            label="Fixture Date"
-            name="date"
+            label="Date"
             type="date"
-            value={form.date}
-            onChange={handleFormChange}
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
             fullWidth
             required
-            InputLabelProps={{
-              shrink: true,
-            }}
+            InputLabelProps={{ shrink: true }}
           />
           <FormControl fullWidth required>
-            <InputLabel id="home-team-label">Home Team</InputLabel>
-            <Select labelId="home-team-label" name="homeTeam" value={form.homeTeam} onChange={handleSelectChange} label="Home Team">
-                {teams.map((team) => (
-                  <MenuItem key={team.id} value={team.name}>
-                    {team.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <FormControl fullWidth required>
-              <InputLabel id="away-team-label">Away Team</InputLabel>
-              <Select labelId="away-team-label" name="awayTeam" value={form.awayTeam} onChange={handleSelectChange} label="Away Team">
-                {teams.map((team) => (
-                  <MenuItem key={team.id} value={team.name}>
-                    {team.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <TextField label="Home Score" name="homeScore" value={form.homeScore} onChange={handleFormChange} type="number" fullWidth required />
-            <TextField label="Away Score" name="awayScore" value={form.awayScore} onChange={handleFormChange} type="number" fullWidth required />
-            <FormControl fullWidth>
-              <InputLabel id="motm-label">Man of the Match</InputLabel>
-              <Select labelId="motm-label" name="manOfTheMatch" value={form.manOfTheMatch} onChange={handleSelectChange} label="Man of the Match">
-                <MenuItem value=""><em>None</em></MenuItem>
-                {players.map((player) => (
-                  <MenuItem key={player.id} value={player.id}>
-                    {player.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+            <InputLabel>Home Team</InputLabel>
+            <Select
+              value={homeTeam}
+              label="Home Team"
+              onChange={(e) => setHomeTeam(e.target.value)}
+            >
+              {teams.map((team) => (
+                <MenuItem key={team.ID} value={team.Name}>
+                  {team.Name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <FormControl fullWidth required>
+            <InputLabel>Away Team</InputLabel>
+            <Select
+              value={awayTeam}
+              label="Away Team"
+              onChange={(e) => setAwayTeam(e.target.value)}
+            >
+              {teams.map((team) => (
+                <MenuItem key={team.ID} value={team.Name}>
+                  {team.Name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <Stack direction="row" spacing={2}>
+            <TextField
+              label="Home Score"
+              type="number"
+              value={homeScore}
+              onChange={(e) => setHomeScore(e.target.value)}
+              fullWidth
+              required
+            />
+            <TextField
+              label="Away Score"
+              type="number"
+              value={awayScore}
+              onChange={(e) => setAwayScore(e.target.value)}
+              fullWidth
+              required
+            />
           </Stack>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog}>Cancel</Button>
-          <Button onClick={handleAddFixture} variant="contained" disabled={isFormInvalid}>
-            Add Fixture
-          </Button>
-        </DialogActions>
-      </Dialog>
-    );
+          <FormControl fullWidth>
+            <InputLabel>Man of the Match</InputLabel>
+            <Select
+              value={manOfTheMatch}
+              label="Man of the Match"
+              onChange={(e) => setManOfTheMatch(e.target.value)}
+            >
+              {players.map((player) => (
+                <MenuItem key={player.ID} value={player.Name}>
+                  {player.Name} ({player.Position})
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Stack>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={handleClose} disabled={submitting}>
+          Cancel
+        </Button>
+        <Button onClick={handleSubmit} variant="contained" disabled={submitting}>
+          {submitting ? 'Adding...' : 'Add Fixture'}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
 } 

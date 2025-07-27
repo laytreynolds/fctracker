@@ -45,7 +45,6 @@ export default function PlayersPage() {
         rowsPerPage={rowsPerPage}
         onPageChange={handleChangePage}
         onRowsPerPageChange={handleChangeRowsPerPage}
-        refresh={refresh}
         />
       <AddPlayerDialog open={open} onClose={handleClose} onSuccess={handleSuccess} />
     </Box>

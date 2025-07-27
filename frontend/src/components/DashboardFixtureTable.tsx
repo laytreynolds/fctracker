@@ -1,42 +1,30 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
-Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TablePagination, Typography, Box, Stack, Button
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  TablePagination,
 } from '@mui/material';
-import type{ TFixture } from '@/types/types';
-import { useNavigate } from 'react-router-dom';
+import type { TFixture } from '@/types/types';
+import { buildApiUrl } from '@/config/api';
 
-interface DashboardFixtureTableProps {
+export default function DashboardFixtureTable({ page, rowsPerPage, onPageChange, onRowsPerPageChange }: {
   page: number;
   rowsPerPage: number;
   onPageChange: (event: unknown, newPage: number) => void;
   onRowsPerPageChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+}) {
+  const [fixtures, setFixtures] = React.useState<TFixture[]>([]);
 
-}
-
-export default function DashboardFixtureTable({
-page,
-rowsPerPage,
-onPageChange, 
-onRowsPerPageChange,
-}: DashboardFixtureTableProps) {
-
-  const [fixtures, setFixtures] = React.useState<TFixture[]>([]);  
-  const navigate = useNavigate();
-
- 
-
-
-
-    // Fetch Fixtures
-    React.useEffect(() => {
-    fetch('http://localhost:8080/api/leaderboard/fixtures').then(res => res.json()).then(data => setFixtures(data.fixtures || []));
+  useEffect(() => {
+    fetch(buildApiUrl('/api/leaderboard/fixtures')).then(res => res.json()).then(data => setFixtures(data.fixtures || []));
   }, []);
 
-  return (       
-     <Box sx={{ mx: 'auto' }}>
-      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-        <Typography variant="h5">Last 5 Fixtures</Typography>
-      </Stack>
+  return (
     <Paper sx={{ width: '100%', overflow: 'hidden', borderRadius: 4 }}>
       <TableContainer>
         <Table>
@@ -46,7 +34,6 @@ onRowsPerPageChange,
               <TableCell>Teams</TableCell>
               <TableCell>Score</TableCell>
               <TableCell>Man of the Match</TableCell>
-              <TableCell /> {/* Details button header */}
             </TableRow>
           </TableHead>
           <TableBody>
@@ -56,16 +43,7 @@ onRowsPerPageChange,
                 <TableCell>{fixture.HomeTeam} v {fixture.AwayTeam}</TableCell>
                 <TableCell>{fixture.HomeScore} - {fixture.AwayScore}</TableCell>
                 <TableCell>{fixture.ManOfTheMatchName ?? '-'}</TableCell>
-                <TableCell>
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    onClick={() => navigate(`/fixtures/${fixture.ID}`)}
-                  >
-                    Details
-                  </Button>
-                </TableCell>
-              </TableRow> 
+              </TableRow>
             ))}
           </TableBody>
         </Table>
@@ -77,9 +55,7 @@ onRowsPerPageChange,
         onPageChange={onPageChange}
         rowsPerPage={rowsPerPage}
         onRowsPerPageChange={onRowsPerPageChange}
-        rowsPerPageOptions={[5, 10, 25]}
       />
     </Paper>
-    </Box>
   );
 }
