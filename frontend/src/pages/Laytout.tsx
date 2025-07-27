@@ -13,6 +13,8 @@ import PersonIcon from '@mui/icons-material/Person';import Brightness4Icon from 
 import Brightness7Icon from '@mui/icons-material/Brightness7';
 import Groups2Icon from '@mui/icons-material/Groups2';
 // import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import logo from '@/assets/logo.png';
+
 const drawerWidth = 240;
 
 const navItems = [
@@ -75,12 +77,33 @@ export default function Layout({ darkMode, setDarkMode }: LayoutProps) {
       <CssBaseline />
       {/* AppBar */}
       <AppBar position="fixed" color="default" sx={{ zIndex: theme.zIndex.drawer + 1, bgcolor: 'background.paper', borderBottom: 1, borderColor: 'divider' }}>
-        <Toolbar>
+        <Toolbar sx={{ minHeight: { xs: '64px', sm: '70px' } }}>
           {!isMdUp && (
             <IconButton color="inherit" edge="start" onClick={handleDrawerToggle} sx={{ mr: 2 }}>
               <MenuIcon />
             </IconButton>
           )}
+          
+          {/* Logo */}
+          <Box sx={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            mr: { xs: 2, sm: 3 },
+            flexShrink: 0
+          }}>
+            <img 
+              src={logo} 
+              alt="FC Tracker Logo" 
+              style={{
+                height: '40px',
+                width: 'auto',
+                maxWidth: '120px',
+                objectFit: 'contain'
+              }}
+            />
+            <Typography variant="h6" sx={{ ml: 2 }}>FC TRACKER</Typography>
+          </Box>
+
           {/* Date */}
           <Box sx={{ flexGrow: 1 }} />
 
@@ -121,7 +144,7 @@ export default function Layout({ darkMode, setDarkMode }: LayoutProps) {
         </Drawer>
       </Box>
       {/* main content */}
-      <Box component="main" sx={{ flexGrow: 1, width: '100%', p: 0, m: 0, minHeight: '100vh', mt: 8 }}>
+      <Box component="main" sx={{ flexGrow: 1, width: '100%', p: 0, m: 0, minHeight: '100vh', mt: { xs: '64px', sm: '70px' } }}>
         <Outlet />
       </Box>
     </Box>

@@ -23,11 +23,11 @@ interface Fixture {
   Date: string;
   HomeTeam: string;
   AwayTeam: string;
-  HomeScore: number;
-  AwayScore: number;
+  HomeScore: string;
+  AwayScore: string;
   ManOfTheMatchName?: string;
-  GoalScorers?: string[];
-  Assists?: string[];
+  GoalScorersNames?: string[];
+  AssistScorersNames?: string[];
 }
 
 export default function FixtureDetailPage() {
@@ -41,7 +41,13 @@ export default function FixtureDetailPage() {
     if (id) {
       fetch(buildApiUrl(`/api/fixture/${id}`))
         .then(res => res.json())
-        .then(data => setFixture(data))
+        .then(data => {
+          if (data.fixture) {
+            setFixture(data.fixture);
+          } else {
+            setError('Fixture not found');
+          }
+        })
         .catch(() => setError('Failed to load fixture'))
         .finally(() => setLoading(false));
     }
@@ -53,7 +59,17 @@ export default function FixtureDetailPage() {
   const handleAddGoal = () => setAddGoalOpen(true);
   const handleAddGoalClose = () => {
     setAddGoalOpen(false);
-    // setRefreshCount((c) => c + 1); // This line was removed
+    // Refresh the fixture data after adding a goal
+    if (id) {
+      fetch(buildApiUrl(`/api/fixture/${id}`))
+        .then(res => res.json())
+        .then(data => {
+          if (data.fixture) {
+            setFixture(data.fixture);
+          }
+        })
+        .catch(() => setError('Failed to refresh fixture'));
+    }
   };
   const handleAddAssist = () => {
     alert('Add Assist (not implemented)');
@@ -95,6 +111,7 @@ export default function FixtureDetailPage() {
               open={addGoalOpen}
               onClose={handleAddGoalClose}
               fixtureId={id || ''}
+              onSuccess={handleAddGoalClose}
             />
             <Button variant="outlined" startIcon={<AddCircleOutlineIcon />} onClick={handleAddAssist}>
               Add Assist
@@ -106,12 +123,10 @@ export default function FixtureDetailPage() {
         </CardContent>
       </Card>
       <Grid container spacing={2}>
-      <Grid size={4}>
-      <Card sx={{ borderRadius: 4 }}>
+        <Grid size={4}>
+          <Card sx={{ borderRadius: 4 }}>
             <CardContent>
               <Typography variant="h6" fontWeight={600} gutterBottom>Lineup</Typography>
-              {/* fixture.Lineup and fixture.LineupNames are removed from the interface, so this will cause an error */}
-              {/* If you need to display lineup, you'll need to fetch it separately or adjust the interface */}
               <Typography color="text.secondary">Lineup data not available.</Typography>
             </CardContent>
           </Card>
@@ -120,9 +135,9 @@ export default function FixtureDetailPage() {
           <Card sx={{ borderRadius: 4, mb: 2 }}>
             <CardContent>
               <Typography variant="h6" fontWeight={600} gutterBottom>Goal Scorers</Typography>
-              {fixture.GoalScorers && fixture.GoalScorers.length > 0 ? (
+              {fixture.GoalScorersNames && fixture.GoalScorersNames.length > 0 ? (
                 <Stack spacing={1}>
-                  {fixture.GoalScorers.map((name: string, idx: number) => (
+                  {fixture.GoalScorersNames.map((name: string, idx: number) => (
                     <Chip key={idx} label={name} color="success" />
                   ))}
                 </Stack>
@@ -136,9 +151,9 @@ export default function FixtureDetailPage() {
           <Card sx={{ borderRadius: 4 }}>
             <CardContent>
               <Typography variant="h6" fontWeight={600} gutterBottom>Assist Providers</Typography>
-              {fixture.Assists && fixture.Assists.length > 0 ? (
+              {fixture.AssistScorersNames && fixture.AssistScorersNames.length > 0 ? (
                 <Stack spacing={1}>
-                  {fixture.Assists.map((name: string, idx: number) => (
+                  {fixture.AssistScorersNames.map((name: string, idx: number) => (
                     <Chip key={idx} label={name} color="info" />
                   ))}
                 </Stack>
