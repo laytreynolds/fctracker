@@ -19,7 +19,7 @@ function App({ darkMode, setDarkMode} : AppProps) {
         <Route path="/players" element={<PlayersPage />}/>
         <Route path="/fixtures" element={<FixturePage />}/>
         <Route path="/teams" element={<TeamPage />}/>
-        <Route path="/fixtures/:id" element={<FixtureDetailPage />}/>
+        <Route path="/fixture/:id" element={<FixtureDetailPage />}/>
       </Route>
     </Routes>
   );
