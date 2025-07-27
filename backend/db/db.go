@@ -34,7 +34,12 @@ func Connect() {
 
 	// Use the SetServerAPIOptions() method to set the Stable API version to 1
 	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
-	opts := options.Client().ApplyURI(uri).SetServerAPIOptions(serverAPI)
+
+	// Configure client options with proper TLS settings
+	opts := options.Client().
+		ApplyURI(uri).
+		SetServerAPIOptions(serverAPI).
+		SetTLSConfig(nil) // Use default TLS config
 
 	// Create a new client and connect to the server
 	var err error
