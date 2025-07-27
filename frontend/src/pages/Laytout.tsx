@@ -85,19 +85,28 @@ export default function Layout({ darkMode, setDarkMode }: LayoutProps) {
           )}
           
           {/* Logo */}
-          <Box sx={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            mr: { xs: 2, sm: 3 },
-            flexShrink: 0
-          }}>
+          <Box 
+            component={Link} 
+            to="/" 
+            sx={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              mr: { xs: 2, sm: 3 },
+              flexShrink: 0,
+              textDecoration: 'none',
+              color: 'inherit',
+              '&:hover': {
+                opacity: 0.8
+              }
+            }}
+          >
             <img 
               src={logo} 
               alt="FC Tracker Logo" 
               style={{
-                height: '40px',
+                height: '60px',
                 width: 'auto',
-                maxWidth: '120px',
+                maxWidth: '100px',
                 objectFit: 'contain'
               }}
             />
