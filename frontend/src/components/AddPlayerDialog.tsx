@@ -26,7 +26,7 @@ export default function AddPlayerDialog({ open, onClose, onSuccess }: AddPlayerD
   const [age, setAge] = useState('');
   const [position, setPosition] = useState('');
   const [funFact, setFunFact] = useState('');
-  const [teamId, setTeamId] = useState('');
+  const [teamName, setTeamName] = useState('');
   const [teams, setTeams] = useState<TTeam[]>([]);
   const [submitting, setSubmitting] = useState(false);
 
@@ -40,7 +40,7 @@ export default function AddPlayerDialog({ open, onClose, onSuccess }: AddPlayerD
   }, [open]);
 
   const handleSubmit = async () => {
-    if (!name || !age || !position || !teamId) {
+    if (!name || !age || !position || !teamName) {
       alert('Please fill in all required fields');
       return;
     }
@@ -53,7 +53,7 @@ export default function AddPlayerDialog({ open, onClose, onSuccess }: AddPlayerD
         age,
         position,
         funFact,
-        teamId,
+        teamName,
       });
 
       const response = await fetch(buildApiUrl(`/api/player/add?${params.toString()}`), {
@@ -68,7 +68,7 @@ export default function AddPlayerDialog({ open, onClose, onSuccess }: AddPlayerD
         setAge('');
         setPosition('');
         setFunFact('');
-        setTeamId('');
+        setTeamName('');
         onClose();
         if (onSuccess) onSuccess();
       } else {
@@ -88,7 +88,7 @@ export default function AddPlayerDialog({ open, onClose, onSuccess }: AddPlayerD
       setAge('');
       setPosition('');
       setFunFact('');
-      setTeamId('');
+      setTeamName('');
       onClose();
     }
   };
@@ -143,12 +143,12 @@ export default function AddPlayerDialog({ open, onClose, onSuccess }: AddPlayerD
           <FormControl fullWidth required>
             <InputLabel>Team</InputLabel>
             <Select
-              value={teamId}
+              value={teamName}
               label="Team"
-              onChange={(e) => setTeamId(e.target.value)}
+              onChange={(e) => setTeamName(e.target.value)}
             >
               {teams.map((team) => (
-                <MenuItem key={team.ID} value={team.ID}>
+                <MenuItem key={team.ID} value={team.Name}>
                   {team.Name}
                 </MenuItem>
               ))}
