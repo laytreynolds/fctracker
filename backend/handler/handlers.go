@@ -33,7 +33,7 @@ func addPlayer(c *gin.Context) {
 	age := c.Query("age")
 	position := c.Query("position")
 	fact := c.Query("fact")
-	teamName := c.Query("team")
+	teamName := c.Query("teamName")
 
 	// Get Team ID from name
 	team, err := db.GetTeamByName(teamName)
