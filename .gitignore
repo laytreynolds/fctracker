@@ -1,1 +1,4 @@
 node_modules
+
+# Self-signed / Let's Encrypt certs (created by scripts/create-cert.sh or certbot)
+nginx/ssl/

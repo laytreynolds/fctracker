@@ -1,0 +1,14 @@
+# Use this when a shared nginx in /opt handles TLS and routing.
+# Run from /opt/fctracker:  docker compose -f compose.yml -f compose.app-only.yml up -d
+# The app is reachable on the shared network as fctracker_app:9090.
+
+# Merges with compose.yml: app stays on backend (for mongodb) and proxy_network (for nginx).
+services:
+  app:
+    networks:
+      - fctracker-backend
+      - proxy_network
+
+networks:
+  proxy_network:
+    external: true
