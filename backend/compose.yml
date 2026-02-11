@@ -21,6 +21,7 @@ services:
       start_period: 10s
 
   app:
+    container_name: fctracker-backend
     build:
       context: .
       dockerfile: Dockerfile
