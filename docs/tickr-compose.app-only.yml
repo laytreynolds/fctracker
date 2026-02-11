@@ -1,0 +1,24 @@
+# Copy this to your tickr project as compose.app-only.yml.
+# Use when the shared nginx in /opt handles TLS and routing.
+# Run from /opt/tickr:  docker compose -f compose.yml -f compose.app-only.yml up -d
+#
+# The app is reachable on the shared network as tickr_app:<PORT>.
+# Set <PORT> to whatever your tickr API listens on (e.g. 8080).
+
+services:
+  app:
+    networks:
+      - backend
+      - proxy_network
+
+  # Disable nginx and certbot when using shared nginx
+  nginx:
+    profiles:
+      - with-nginx
+  certbot:
+    profiles:
+      - with-nginx
+
+networks:
+  proxy_network:
+    external: true
