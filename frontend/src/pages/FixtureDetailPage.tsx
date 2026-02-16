@@ -15,6 +15,7 @@ import {
 import EditIcon from '@mui/icons-material/Edit';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import AddGoalscorerDialogue from '@/components/AddGoalScorerDialogue';
+import AddAssistDialogue from '@/components/AddAssistDialogue';
 import FixtureDetailMap from '@/components/FixtureDetailMap';
 import { buildApiUrl } from '@/config/api';
 
@@ -27,6 +28,7 @@ export default function FixtureDetailPage() {
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const [addGoalOpen, setAddGoalOpen] = React.useState(false);
+  const [addAssistOpen, setAddAssistOpen] = React.useState(false);
 
   useEffect(() => {
     if (id) {
@@ -48,9 +50,7 @@ export default function FixtureDetailPage() {
     alert('Edit Fixture (not implemented)');
   };
   const handleAddGoal = () => setAddGoalOpen(true);
-  const handleAddGoalClose = () => {
-    setAddGoalOpen(false);
-    // Refresh the fixture data after adding a goal
+  const refreshFixture = () => {
     if (id) {
       fetch(buildApiUrl(`/api/fixture/${id}`))
         .then(res => res.json())
@@ -62,8 +62,14 @@ export default function FixtureDetailPage() {
         .catch(() => setError('Failed to refresh fixture'));
     }
   };
-  const handleAddAssist = () => {
-    alert('Add Assist (not implemented)');
+  const handleAddGoalClose = () => {
+    setAddGoalOpen(false);
+    refreshFixture();
+  };
+  const handleAddAssist = () => setAddAssistOpen(true);
+  const handleAddAssistClose = () => {
+    setAddAssistOpen(false);
+    refreshFixture();
   };
 
   if (loading) return <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}><CircularProgress /></Box>;
@@ -107,6 +113,12 @@ export default function FixtureDetailPage() {
             <Button variant="outlined" startIcon={<AddCircleOutlineIcon />} onClick={handleAddAssist}>
               Add Assist
             </Button>
+            <AddAssistDialogue
+              open={addAssistOpen}
+              onClose={handleAddAssistClose}
+              fixtureId={id || ''}
+              onSuccess={handleAddAssistClose}
+            />
             <Button variant="contained" startIcon={<EditIcon />} onClick={handleEdit}>
               Edit Fixture
             </Button>
