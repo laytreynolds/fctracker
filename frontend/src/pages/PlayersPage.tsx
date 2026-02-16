@@ -1,4 +1,4 @@
-import React from 'react';
+import { useCallback, useState } from 'react';
 import {
   Box,
   Button,
@@ -9,26 +9,27 @@ import AddPlayerDialog from '@/components/AddPlayerDialog';
 import PlayerTable from '@/components/PlayerTable';
 
 export default function PlayersPage() {
-  const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(5);
-  const [open, setOpen] = React.useState(false);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [open, setOpen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
-  const handleChangePage = (_: unknown, newPage: number) => {
+  const handleChangePage = useCallback((_: unknown, newPage: number) => {
     setPage(newPage);
-  };
+  }, []);
 
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChangeRowsPerPage = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
-  };
+  }, []);
 
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  const handleOpen = useCallback(() => setOpen(true), []);
+  const handleClose = useCallback(() => setOpen(false), []);
 
-  const handleSuccess = () => {
-    handleClose();
-    // PlayerTable now manages its own data fetching, so no need to trigger refresh
-  };
+  const handleSuccess = useCallback(() => {
+    setOpen(false);
+    setRefreshKey((k) => k + 1);
+  }, []);
 
   return (
     <Box sx={{ p: { xs: 1, sm: 2, md: 3 }, maxWidth: 1000, mx: 'auto' }}>
@@ -43,6 +44,7 @@ export default function PlayersPage() {
         rowsPerPage={rowsPerPage}
         onPageChange={handleChangePage}
         onRowsPerPageChange={handleChangeRowsPerPage}
+        refreshKey={refreshKey}
         />
       <AddPlayerDialog open={open} onClose={handleClose} onSuccess={handleSuccess} />
     </Box>

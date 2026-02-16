@@ -10,13 +10,11 @@ import {
 } from '@mui/material';
 import { buildApiUrl } from '@/config/api';
 
-interface AddTeamDialogueProps {
+export default function AddTeamDialogue({ open, onClose, onSuccess }: {
   open: boolean;
   onClose: () => void;
-  onSuccess?: () => void;
-}
-
-export default function AddTeamDialogue({ open, onClose, onSuccess }: AddTeamDialogueProps) {
+  onSuccess: () => void;
+}) {
   const [name, setName] = useState('');
   const [coach, setCoach] = useState('');
   const [founded, setFounded] = useState('');

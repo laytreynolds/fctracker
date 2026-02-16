@@ -1,5 +1,4 @@
-// src/pages/HomePage.tsx
-import React from 'react';
+import { useCallback, useState } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 
 import {
@@ -39,15 +38,16 @@ interface LayoutProps {
 export default function Layout({ darkMode, setDarkMode }: LayoutProps) {
   const theme = useTheme();
   const location = useLocation();
-  const [mobileOpen, setMobileOpen] = React.useState(false);
-  // const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-  // const isMenuOpen = Boolean(anchorEl);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const isMdUp = useMediaQuery(theme.breakpoints.up('md'));
 
-  const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
- // const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => setAnchorEl(event.currentTarget);
-// const handleMenuClose = () => setAnchorEl(null);
-  const handleDarkModeToggle = () => setDarkMode((prev: boolean) => !prev);
+  const handleDrawerToggle = useCallback(() => {
+    setMobileOpen((prev) => !prev);
+  }, []);
+
+  const handleDarkModeToggle = useCallback(() => {
+    setDarkMode((prev: boolean) => !prev);
+  }, [setDarkMode]);
 
   // const [currentDate] = React.useState(getDate());
 
@@ -60,7 +60,7 @@ export default function Layout({ darkMode, setDarkMode }: LayoutProps) {
       <Divider />
       <List>
         {navItems.map(({ text, icon, link }) => (
-          <ListItem key={text} disablePadding>
+          <ListItem key={link} disablePadding>
             <ListItemButton component={Link} to={link} selected={location.pathname === link}>
               <ListItemIcon sx={{ color: 'inherit' }}>{icon}</ListItemIcon>
               <ListItemText primary={text} />

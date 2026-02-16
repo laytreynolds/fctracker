@@ -34,14 +34,13 @@ export default function FixtureDetailMap({ fixture }: FixtureDetailMapProps) {
       return;
     }
 
-    if (map.current) return; // initialize map only once
+    const container = mapContainer.current;
+    if (!container || map.current) return;
 
-    // Set the access token
     mapboxgl.accessToken = MAPBOX_CONFIG.accessToken;
 
-    // Create the map
     map.current = new mapboxgl.Map({
-      container: mapContainer.current!,
+      container,
       style: MAPBOX_CONFIG.style,
       center: coordinates,
       zoom: MAPBOX_CONFIG.defaultZoom

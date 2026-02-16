@@ -140,7 +140,7 @@ export default function FixtureDetailPage() {
               {fixture.GoalScorersNames && fixture.GoalScorersNames.length > 0 ? (
                 <Stack spacing={1}>
                   {fixture.GoalScorersNames.map((name: string, idx: number) => (
-                    <Chip key={idx} label={name} color="success" />
+                    <Chip key={`goal-${idx}-${name}`} label={name} color="success" />
                   ))}
                 </Stack>
               ) : (
@@ -156,7 +156,7 @@ export default function FixtureDetailPage() {
               {fixture.AssistScorersNames && fixture.AssistScorersNames.length > 0 ? (
                 <Stack spacing={1}>
                   {fixture.AssistScorersNames.map((name: string, idx: number) => (
-                    <Chip key={idx} label={name} color="info" />
+                    <Chip key={`assist-${idx}-${name}`} label={name} color="info" />
                   ))}
                 </Stack>
               ) : (

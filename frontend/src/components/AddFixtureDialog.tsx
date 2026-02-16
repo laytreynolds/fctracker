@@ -37,19 +37,21 @@ export default function AddFixtureDialog({ open, onClose, onSuccess }: AddFixtur
   const [geocodingError, setGeocodingError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (open) {
-      // Fetch players for Man of the Match selection
-      fetch(buildApiUrl('/api/player'))
-        .then(res => res.json())
-        .then(data => setPlayers(data.players || []))
-        .catch(error => console.error('Error fetching players:', error));
-
-      // Fetch teams
-      fetch(buildApiUrl('/api/team/getall'))
-        .then(res => res.json())
-        .then(data => setTeams(data.teams || []))
-        .catch(error => console.error('Error fetching teams:', error));
-    }
+    if (!open) return;
+    const controller = new AbortController();
+    const opts = { signal: controller.signal };
+    Promise.all([
+      fetch(buildApiUrl('/api/player'), opts).then(res => res.json()),
+      fetch(buildApiUrl('/api/team/getall'), opts).then(res => res.json()),
+    ])
+      .then(([playerData, teamData]) => {
+        setPlayers(playerData.players || []);
+        setTeams(teamData.teams || []);
+      })
+      .catch((error) => {
+        if (error.name !== 'AbortError') console.error('Error fetching dialog data:', error);
+      });
+    return () => controller.abort();
   }, [open]);
 
   const handleSubmit = async () => {

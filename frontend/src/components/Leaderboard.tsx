@@ -1,29 +1,63 @@
-import React, { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {
-    Grid, Card, CardContent, Typography, List, ListItem, Stack
-  } from '@mui/material';
-
-import SportsSoccerIcon from '@mui/icons-material/SportsSoccer'; // Goal
-import TrackChangesIcon from '@mui/icons-material/TrackChanges'; // Target (Assists)
-import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';   // Trophy (MOTM)
+  Grid, Card, CardContent, Typography, List, ListItem, Stack, CircularProgress, Box,
+} from '@mui/material';
+import SportsSoccerIcon from '@mui/icons-material/SportsSoccer';
+import TrackChangesIcon from '@mui/icons-material/TrackChanges';
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import type { TPlayer } from '@/types/types';
 import { buildApiUrl } from '@/config/api';
 
-export default function Leaderboard(){
-    
-    const [goals, setGoals] = React.useState<TPlayer[]>([]);
-  const [assists, setAssists] = React.useState<TPlayer[]>([]);
-  const [motm, setMotm] = React.useState<TPlayer[]>([]);
+export default function Leaderboard() {
+  const [goals, setGoals] = useState<TPlayer[]>([]);
+  const [assists, setAssists] = useState<TPlayer[]>([]);
+  const [motm, setMotm] = useState<TPlayer[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-   // Fetch leaderboards
-   useEffect(() => {
-    fetch(buildApiUrl('/api/leaderboard/goals')).then(res => res.json()).then(data => setGoals(data.players || []));
-    fetch(buildApiUrl('/api/leaderboard/assists')).then(res => res.json()).then(data => setAssists(data.players || []));
-    fetch(buildApiUrl('/api/leaderboard/motm')).then(res => res.json()).then(data => setMotm(data.players || []));
+  useEffect(() => {
+    setLoading(true);
+    setError(null);
+    Promise.all([
+      fetch(buildApiUrl('/api/leaderboard/goals')).then((res) => {
+        if (!res.ok) throw new Error('Failed to load leaderboard');
+        return res.json();
+      }),
+      fetch(buildApiUrl('/api/leaderboard/assists')).then((res) => {
+        if (!res.ok) throw new Error('Failed to load leaderboard');
+        return res.json();
+      }),
+      fetch(buildApiUrl('/api/leaderboard/motm')).then((res) => {
+        if (!res.ok) throw new Error('Failed to load leaderboard');
+        return res.json();
+      }),
+    ])
+      .then(([goalsData, assistsData, motmData]) => {
+        setGoals(goalsData.players || []);
+        setAssists(assistsData.players || []);
+        setMotm(motmData.players || []);
+      })
+      .catch((err) => setError(err instanceof Error ? err.message : 'Failed to load leaderboard'))
+      .finally(() => setLoading(false));
   }, []);
     
+  if (loading) {
     return (
-      <Grid
+      <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+  if (error) {
+    return (
+      <Typography color="error" sx={{ py: 2, textAlign: 'center' }}>
+        {error}
+      </Typography>
+    );
+  }
+
+  return (
+    <Grid
       container
       spacing={2}
       justifyContent="center"
@@ -98,5 +132,5 @@ export default function Leaderboard(){
           </Card>
         </Grid>
       </Grid>
-            );
+  );
 }
