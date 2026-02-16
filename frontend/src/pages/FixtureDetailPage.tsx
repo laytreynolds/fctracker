@@ -78,11 +78,60 @@ export default function FixtureDetailPage() {
   if (!fixture) return null;
 
   return (
-    <Box sx={{ p: { xs: 2, sm: 3, md: 4 }, maxWidth: 1100, mx: 'auto' }}>
-      <FadeIn>
-        <Box sx={{ pt: { xs: 2, md: 3 }, pb: 2 }}>
-          <Typography variant="overline" sx={{ color: 'primary.main', mb: 1, display: 'block' }}>
-            Fixture Details
+    <Box sx={{ p: { xs: 1, sm: 2, md: 3 }, maxWidth: 1000, mx: 'auto', mt: 4 }}>
+      <Card sx={{ borderRadius: 4, mb: 3 }}>
+        <CardContent>
+          <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={2}>
+            <Box>
+              <Typography variant="h5" fontWeight={700} gutterBottom>
+                {fixture.HomeTeam} vs {fixture.AwayTeam}
+              </Typography>
+              <Typography variant="subtitle1" color="text.secondary">
+                Date: {fixture.Date}
+              </Typography>
+            </Box>
+            <Box>
+              <Typography variant="h4" fontWeight={700}>
+                {fixture.HomeScore} - {fixture.AwayScore}
+              </Typography>
+            </Box>
+          </Stack>
+          <Divider sx={{ my: 2 }} />
+          <Stack direction="row" spacing={2} alignItems="center" mb={2}>
+            <Typography variant="body1" fontWeight={500}>Man of the Match:</Typography>
+            <Chip label={fixture.ManOfTheMatchName || 'N/A'} color="success" />
+          </Stack>    
+          <Stack direction="row" spacing={2}>
+            <Button variant="outlined" startIcon={<AddCircleOutlineIcon />} onClick={handleAddGoal}>
+              Add Goalscorer
+            </Button>
+            <AddGoalscorerDialogue
+              open={addGoalOpen}
+              onClose={handleAddGoalClose}
+              fixtureId={id || ''}
+              onSuccess={handleAddGoalClose}
+            />
+            <Button variant="outlined" startIcon={<AddCircleOutlineIcon />} onClick={handleAddAssist}>
+              Add Assist
+            </Button>
+            <AddAssistDialogue
+              open={addAssistOpen}
+              onClose={handleAddAssistClose}
+              fixtureId={id || ''}
+              onSuccess={handleAddAssistClose}
+            />
+            <Button variant="contained" startIcon={<EditIcon />} onClick={handleEdit}>
+              Edit Fixture
+            </Button>
+          </Stack>
+        </CardContent>
+      </Card>
+
+      {/* Map Section */}
+      <Card sx={{ borderRadius: 4, mb: 3 }}>
+        <CardContent>
+          <Typography variant="h6" fontWeight={600} gutterBottom>
+            Fixture Location
           </Typography>
         </Box>
       </FadeIn>
