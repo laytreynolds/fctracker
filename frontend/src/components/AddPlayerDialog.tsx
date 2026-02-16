@@ -31,12 +31,15 @@ export default function AddPlayerDialog({ open, onClose, onSuccess }: AddPlayerD
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (open) {
-      fetch(buildApiUrl('/api/team/getall'))
-        .then(res => res.json())
-        .then(data => setTeams(data.teams || []))
-        .catch(error => console.error('Error fetching teams:', error));
-    }
+    if (!open) return;
+    const controller = new AbortController();
+    fetch(buildApiUrl('/api/team/getall'), { signal: controller.signal })
+      .then(res => res.json())
+      .then(data => setTeams(data.teams || []))
+      .catch((error) => {
+        if (error.name !== 'AbortError') console.error('Error fetching teams:', error);
+      });
+    return () => controller.abort();
   }, [open]);
 
   const handleSubmit = async () => {

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Table,
   TableBody,
@@ -9,6 +9,9 @@ import {
   Paper,
   TablePagination,
   Button,
+  CircularProgress,
+  Typography,
+  Box,
 } from '@mui/material';
 import type { TFixture } from '@/types/types';
 import { buildApiUrl } from '@/config/api';
@@ -20,11 +23,38 @@ export default function DashboardFixtureTable({ page, rowsPerPage, onPageChange,
   onPageChange: (event: unknown, newPage: number) => void;
   onRowsPerPageChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }) {
-  const [fixtures, setFixtures] = React.useState<TFixture[]>([]);
+  const [fixtures, setFixtures] = useState<TFixture[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+
   useEffect(() => {
-    fetch(buildApiUrl('/api/leaderboard/fixtures')).then(res => res.json()).then(data => setFixtures(data.fixtures || []));
+    setLoading(true);
+    setError(null);
+    fetch(buildApiUrl('/api/leaderboard/fixtures'))
+      .then((res) => {
+        if (!res.ok) throw new Error('Failed to load fixtures');
+        return res.json();
+      })
+      .then((data) => setFixtures(data.fixtures || []))
+      .catch((err) => setError(err instanceof Error ? err.message : 'Failed to load fixtures'))
+      .finally(() => setLoading(false));
   }, []);
+
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+  if (error) {
+    return (
+      <Typography color="error" sx={{ py: 2, textAlign: 'center' }}>
+        {error}
+      </Typography>
+    );
+  }
 
   return (
     <Paper sx={{ width: '100%', overflow: 'hidden', borderRadius: 4 }}>

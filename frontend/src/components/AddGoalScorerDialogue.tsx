@@ -24,40 +24,41 @@ export default function AddGoalscorerDialogue({ open, onClose, fixtureId, onSucc
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (open) {
-      fetch(buildApiUrl('/api/player'))
-        .then(res => res.json())
-        .then(data => setPlayers(data.players || []))
-        .catch(error => console.error('Error fetching players:', error));
-    }
+    if (!open) return;
+    const controller = new AbortController();
+    fetch(buildApiUrl('/api/player'), { signal: controller.signal })
+      .then(res => res.json())
+      .then(data => setPlayers(data.players || []))
+      .catch((error) => {
+        if (error.name !== 'AbortError') console.error('Error fetching players:', error);
+      });
+    return () => controller.abort();
   }, [open]);
 
-  const handleSubmit = (playerId: string) => {
+  const handleSubmit = async (playerId: string) => {
     setSubmitting(true);
-    
-    fetch(buildApiUrl(`/api/fixture/addgoalscorer?fixtureId=${fixtureId}&playerId=${playerId}`), {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
-    .then(res => res.json())
-    .then(data => {
+    try {
+      const res = await fetch(
+        buildApiUrl(`/api/fixture/addgoalscorer?fixtureId=${fixtureId}&playerId=${playerId}`),
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+      const data = await res.json();
       if (data.error) {
         alert(`Error: ${data.error}`);
       } else {
         setSelectedPlayerId('');
         onClose();
-        if (onSuccess) onSuccess();
+        onSuccess?.();
       }
-    })
-    .catch(error => {
+    } catch (error) {
       console.error('Error adding goalscorer:', error);
       alert('Failed to add goalscorer');
-    })
-    .finally(() => {
+    } finally {
       setSubmitting(false);
-    });
+    }
   };
 
   const handleClose = () => {

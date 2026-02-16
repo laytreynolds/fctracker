@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Table,
   TableBody,
@@ -8,21 +8,51 @@ import {
   TableRow,
   Paper,
   TablePagination,
+  CircularProgress,
+  Typography,
+  Box,
 } from '@mui/material';
 import type { TPlayer } from '@/types/types';
 import { buildApiUrl } from '@/config/api';
 
-export default function PlayerTable({ page, rowsPerPage, onPageChange, onRowsPerPageChange }: {
+export default function PlayerTable({ page, rowsPerPage, onPageChange, onRowsPerPageChange, refreshKey }: {
   page: number;
   rowsPerPage: number;
   onPageChange: (event: unknown, newPage: number) => void;
   onRowsPerPageChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-}) {
-  const [players, setPlayers] = React.useState<TPlayer[]>([]);
+  refreshKey: number;
+  }) {
+  const [players, setPlayers] = useState<TPlayer[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch(buildApiUrl('/api/player')).then(res => res.json()).then(data => setPlayers(data.players || []));
-  }, []);
+    setLoading(true);
+    setError(null);
+    fetch(buildApiUrl('/api/player'))
+      .then((res) => {
+        if (!res.ok) throw new Error('Failed to load players');
+        return res.json();
+      })
+      .then((data) => setPlayers(data.players || []))
+      .catch((err) => setError(err instanceof Error ? err.message : 'Failed to load players'))
+      .finally(() => setLoading(false));
+  }, [refreshKey]);
+
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+  if (error) {
+    return (
+      <Typography color="error" sx={{ py: 2, textAlign: 'center' }}>
+        {error}
+      </Typography>
+    );
+  }
 
   return (
     <Paper sx={{ width: '100%', overflow: 'hidden', borderRadius: 4 }}>
