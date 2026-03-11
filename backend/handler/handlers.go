@@ -8,7 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// DB init
+// DB initalisation
 func seed(c *gin.Context) {
 	db.SeedPlayers()
 }
@@ -55,7 +55,7 @@ func addPlayer(c *gin.Context) {
 	fact := c.Query("fact")
 	teamName := c.Query("teamName")
 
-	// Get Team ID from name
+	// Get Team ID from Team Name
 	team, err := db.GetTeamByName(teamName)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "error finding team", "error": err.Error()})
