@@ -76,9 +76,14 @@ export default function FixtureTable() {
 
   return (       
      <Box sx={{ mx: 'auto' }}>
-      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-        <Typography variant="h5">Fixtures</Typography>
-        <Button variant="contained" color="primary" onClick={handleOpen}>
+      <Stack direction="row" justifyContent="space-between" alignItems="flex-end" sx={{ mb: 3, pt: { xs: 2, md: 3 } }}>
+        <Box>
+          <Typography variant="overline" sx={{ color: 'primary.main', mb: 0.5, display: 'block' }}>
+            Match History
+          </Typography>
+          <Typography variant="h3">Fixtures</Typography>
+        </Box>
+        <Button variant="contained" onClick={handleOpen}>
           Add Fixture
         </Button>
       </Stack>

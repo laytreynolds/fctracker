@@ -7,7 +7,7 @@ import {
 } from '@mui/material';
 import AddTeamDialogue from '@/components/AddTeamDialogue';
 import TeamTable from '@/components/TeamTable';
-
+import FadeIn from '@/components/FadeIn';
 
 export default function TeamPage() {
   const [page, setPage] = useState(0);
@@ -33,20 +33,29 @@ export default function TeamPage() {
   }, []);
 
   return (
-    <Box sx={{ p: { xs: 1, sm: 2, md: 3 }, maxWidth: 1000, mx: 'auto' }}>
-      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-        <Typography variant="h5">Teams</Typography>
-        <Button variant="contained" color="primary" onClick={handleOpen}>
-          Add Team
-        </Button>
-      </Stack>
-      <TeamTable
-        page={page}
-        rowsPerPage={rowsPerPage}
-        onPageChange={handleChangePage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
-        refreshKey={refreshKey}
-      />
+    <Box sx={{ p: { xs: 2, sm: 3, md: 4 }, maxWidth: 1100, mx: 'auto' }}>
+      <FadeIn>
+        <Stack direction="row" justifyContent="space-between" alignItems="flex-end" sx={{ mb: 3, pt: { xs: 2, md: 3 } }}>
+          <Box>
+            <Typography variant="overline" sx={{ color: 'primary.main', mb: 0.5, display: 'block' }}>
+              Club
+            </Typography>
+            <Typography variant="h3">Teams</Typography>
+          </Box>
+          <Button variant="contained" onClick={handleOpen}>
+            Add Team
+          </Button>
+        </Stack>
+      </FadeIn>
+      <FadeIn delay={0.1}>
+        <TeamTable
+          page={page}
+          rowsPerPage={rowsPerPage}
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+          refreshKey={refreshKey}
+        />
+      </FadeIn>
       <AddTeamDialogue open={open} onClose={handleClose} onSuccess={handleSuccess} />
     </Box>
   );

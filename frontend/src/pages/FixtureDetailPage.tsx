@@ -17,9 +17,9 @@ import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import AddGoalscorerDialogue from '@/components/AddGoalScorerDialogue';
 import AddAssistDialogue from '@/components/AddAssistDialogue';
 import FixtureDetailMap from '@/components/FixtureDetailMap';
+import FadeIn from '@/components/FadeIn';
 import { buildApiUrl } from '@/config/api';
 
-// Use the TFixture type from types.tsx
 import type { TFixture } from '@/types/types';
 
 export default function FixtureDetailPage() {
@@ -72,119 +72,149 @@ export default function FixtureDetailPage() {
     refreshFixture();
   };
 
-  if (loading) return <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}><CircularProgress /></Box>;
+  if (loading) return <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}><CircularProgress size={32} /></Box>;
   if (error) return <Typography color="error" sx={{ mt: 8, textAlign: 'center' }}>{error}</Typography>;
   if (!fixture) return null;
 
   return (
-    <Box sx={{ p: { xs: 1, sm: 2, md: 3 }, maxWidth: 1000, mx: 'auto', mt: 4 }}>
-      <Card sx={{ borderRadius: 4, mb: 3 }}>
-        <CardContent>
-          <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={2}>
-            <Box>
-              <Typography variant="h5" fontWeight={700} gutterBottom>
-                {fixture.HomeTeam} vs {fixture.AwayTeam}
-              </Typography>
-              <Typography variant="subtitle1" color="text.secondary">
-                Date: {fixture.Date}
-              </Typography>
-            </Box>
-            <Box>
-              <Typography variant="h4" fontWeight={700}>
-                {fixture.HomeScore} - {fixture.AwayScore}
-              </Typography>
-            </Box>
-          </Stack>
-          <Divider sx={{ my: 2 }} />
-          <Stack direction="row" spacing={2} alignItems="center" mb={2}>
-            <Typography variant="body1" fontWeight={500}>Man of the Match:</Typography>
-            <Chip label={fixture.ManOfTheMatchName || 'N/A'} color="success" />
-          </Stack>    
-          <Stack direction="row" spacing={2}>
-            <Button variant="outlined" startIcon={<AddCircleOutlineIcon />} onClick={handleAddGoal}>
-              Add Goalscorer
-            </Button>
-            <AddGoalscorerDialogue
-              open={addGoalOpen}
-              onClose={handleAddGoalClose}
-              fixtureId={id || ''}
-              onSuccess={handleAddGoalClose}
-            />
-            <Button variant="outlined" startIcon={<AddCircleOutlineIcon />} onClick={handleAddAssist}>
-              Add Assist
-            </Button>
-            <AddAssistDialogue
-              open={addAssistOpen}
-              onClose={handleAddAssistClose}
-              fixtureId={id || ''}
-              onSuccess={handleAddAssistClose}
-            />
-            <Button variant="contained" startIcon={<EditIcon />} onClick={handleEdit}>
-              Edit Fixture
-            </Button>
-          </Stack>
-        </CardContent>
-      </Card>
-
-      {/* Map Section */}
-      <Card sx={{ borderRadius: 4, mb: 3 }}>
-        <CardContent>
-          <Typography variant="h6" fontWeight={600} gutterBottom>
-            Fixture Location
+    <Box sx={{ p: { xs: 2, sm: 3, md: 4 }, maxWidth: 1100, mx: 'auto' }}>
+      <FadeIn>
+        <Box sx={{ pt: { xs: 2, md: 3 }, pb: 2 }}>
+          <Typography variant="overline" sx={{ color: 'primary.main', mb: 1, display: 'block' }}>
+            Fixture Details
           </Typography>
-          <FixtureDetailMap fixture={fixture} />
-        </CardContent>
-      </Card>
+        </Box>
+      </FadeIn>
 
-      <Grid container spacing={2}>
-        <Grid size={4}>
-          <Card sx={{ borderRadius: 4 }}>
-            <CardContent>
-              <Typography variant="h6" fontWeight={600} gutterBottom>Lineup</Typography>
-              <Typography color="text.secondary">Lineup data not available.</Typography>
-            </CardContent>
-          </Card>
+      <FadeIn delay={0.05}>
+        <Card sx={{ mb: 3 }}>
+          <CardContent sx={{ p: 3, '&:last-child': { pb: 3 } }}>
+            <Stack
+              direction={{ xs: 'column', sm: 'row' }}
+              justifyContent="space-between"
+              alignItems={{ xs: 'flex-start', sm: 'center' }}
+              spacing={2}
+            >
+              <Box>
+                <Typography variant="h4" gutterBottom>
+                  {fixture.HomeTeam} vs {fixture.AwayTeam}
+                </Typography>
+                <Typography variant="body2">
+                  {fixture.Date}
+                </Typography>
+              </Box>
+              <Box
+                sx={{
+                  px: 3,
+                  py: 1.5,
+                  borderRadius: '12px',
+                  bgcolor: 'rgba(108, 99, 255, 0.08)',
+                  border: '1px solid rgba(108, 99, 255, 0.2)',
+                }}
+              >
+                <Typography variant="h3" sx={{ color: 'primary.main', textAlign: 'center' }}>
+                  {fixture.HomeScore} - {fixture.AwayScore}
+                </Typography>
+              </Box>
+            </Stack>
+
+            <Divider sx={{ my: 2.5 }} />
+
+            <Stack direction="row" spacing={2} alignItems="center" mb={2.5}>
+              <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.secondary' }}>
+                Man of the Match
+              </Typography>
+              <Chip label={fixture.ManOfTheMatchName || 'N/A'} color="warning" size="small" />
+            </Stack>
+
+            <Stack direction="row" spacing={1.5} flexWrap="wrap" useFlexGap>
+              <Button variant="outlined" size="small" startIcon={<AddCircleOutlineIcon />} onClick={handleAddGoal}>
+                Add Goalscorer
+              </Button>
+              <AddGoalscorerDialogue
+                open={addGoalOpen}
+                onClose={handleAddGoalClose}
+                fixtureId={id || ''}
+                onSuccess={handleAddGoalClose}
+              />
+              <Button variant="outlined" size="small" startIcon={<AddCircleOutlineIcon />} onClick={handleAddAssist}>
+                Add Assist
+              </Button>
+              <AddAssistDialogue
+                open={addAssistOpen}
+                onClose={handleAddAssistClose}
+                fixtureId={id || ''}
+                onSuccess={handleAddAssistClose}
+              />
+              <Button variant="contained" size="small" startIcon={<EditIcon />} onClick={handleEdit}>
+                Edit Fixture
+              </Button>
+            </Stack>
+          </CardContent>
+        </Card>
+      </FadeIn>
+
+      <FadeIn delay={0.1}>
+        <Card sx={{ mb: 3 }}>
+          <CardContent sx={{ p: 3, '&:last-child': { pb: 3 } }}>
+            <Typography variant="overline" sx={{ color: 'primary.main', mb: 2, display: 'block' }}>
+              Location
+            </Typography>
+            <FixtureDetailMap fixture={fixture} />
+          </CardContent>
+        </Card>
+      </FadeIn>
+
+      <FadeIn delay={0.15}>
+        <Grid container spacing={2.5}>
+          <Grid size={{ xs: 12, md: 4 }}>
+            <Card sx={{ height: '100%' }}>
+              <CardContent sx={{ p: 2.5, '&:last-child': { pb: 2.5 } }}>
+                <Typography variant="overline" sx={{ color: 'text.secondary', mb: 1.5, display: 'block' }}>
+                  Lineup
+                </Typography>
+                <Typography variant="body2">Lineup data not available.</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid size={{ xs: 12, md: 4 }}>
+            <Card sx={{ height: '100%' }}>
+              <CardContent sx={{ p: 2.5, '&:last-child': { pb: 2.5 } }}>
+                <Typography variant="overline" sx={{ color: '#4ade80', mb: 1.5, display: 'block' }}>
+                  Goal Scorers
+                </Typography>
+                {fixture.GoalScorersNames && fixture.GoalScorersNames.length > 0 ? (
+                  <Stack spacing={1} direction="row" flexWrap="wrap" useFlexGap>
+                    {fixture.GoalScorersNames.map((name: string, idx: number) => (
+                      <Chip key={idx} label={name} color="success" size="small" />
+                    ))}
+                  </Stack>
+                ) : (
+                  <Typography variant="body2">No goals</Typography>
+                )}
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid size={{ xs: 12, md: 4 }}>
+            <Card sx={{ height: '100%' }}>
+              <CardContent sx={{ p: 2.5, '&:last-child': { pb: 2.5 } }}>
+                <Typography variant="overline" sx={{ color: '#60a5fa', mb: 1.5, display: 'block' }}>
+                  Assist Providers
+                </Typography>
+                {fixture.AssistScorersNames && fixture.AssistScorersNames.length > 0 ? (
+                  <Stack spacing={1} direction="row" flexWrap="wrap" useFlexGap>
+                    {fixture.AssistScorersNames.map((name: string, idx: number) => (
+                      <Chip key={idx} label={name} color="info" size="small" />
+                    ))}
+                  </Stack>
+                ) : (
+                  <Typography variant="body2">No assists</Typography>
+                )}
+              </CardContent>
+            </Card>
+          </Grid>
         </Grid>
-        <Grid size={4}>
-          <Card sx={{ borderRadius: 4, mb: 2 }}>
-            <CardContent>
-              <Typography variant="h6" fontWeight={600} gutterBottom>Goal Scorers</Typography>
-              {fixture.GoalScorersNames && fixture.GoalScorersNames.length > 0 ? (
-                <Stack spacing={1}>
-                  {fixture.GoalScorersNames.map((name: string, idx: number) => (
-                    <Chip key={idx} label={name} color="success" />
-                  ))}
-                </Stack>
-              ) : (
-                <Typography color="text.secondary">No goals</Typography>
-              )}
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid size={4}>
-          <Card sx={{ borderRadius: 4 }}>
-            <CardContent>
-              <Typography variant="h6" fontWeight={600} gutterBottom>Assist Providers</Typography>
-              {fixture.AssistScorersNames && fixture.AssistScorersNames.length > 0 ? (
-                <Stack spacing={1}>
-                  {fixture.AssistScorersNames.map((name: string, idx: number) => (
-                    <Chip key={idx} label={name} color="info" />
-                  ))}
-                </Stack>
-              ) : (
-                <Typography color="text.secondary">No assists</Typography>
-              )}
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
-      {/* Related info: Teams/Players links if available */}
-      <Box sx={{ mt: 4 }}>
-        <Typography variant="subtitle2" color="text.secondary">
-          {/* Example: Add links to teams or players if you have their IDs */}
-          {/* <Link to={`/teams/${fixture.HomeTeamId}`}>{fixture.HomeTeam}</Link> */}
-        </Typography>
-      </Box>
+      </FadeIn>
     </Box>
   );
-} 
+}
