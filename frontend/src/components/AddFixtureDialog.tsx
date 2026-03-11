@@ -14,7 +14,7 @@ import {
   Alert,
 } from '@mui/material';
 import type { TPlayer, TTeam } from '@/types/types';
-import { buildApiUrl } from '@/config/api';
+import { authFetch } from '@/config/api';
 import { postcodeToCoordinates } from '@/utils/geocoding';
 
 interface AddFixtureDialogProps {
@@ -41,8 +41,8 @@ export default function AddFixtureDialog({ open, onClose, onSuccess }: AddFixtur
     const controller = new AbortController();
     const opts = { signal: controller.signal };
     Promise.all([
-      fetch(buildApiUrl('/api/player'), opts).then(res => res.json()),
-      fetch(buildApiUrl('/api/team/getall'), opts).then(res => res.json()),
+      authFetch('/api/player', opts).then(res => res.json()),
+      authFetch('/api/team/getall', opts).then(res => res.json()),
     ])
       .then(([playerData, teamData]) => {
         setPlayers(playerData.players || []);
@@ -90,7 +90,7 @@ export default function AddFixtureDialog({ open, onClose, onSuccess }: AddFixtur
         params.append('longitude', coordinates.longitude.toString());
       }
 
-      const response = await fetch(buildApiUrl(`/api/fixture/add?${params.toString()}`), {
+      const response = await authFetch(`/api/fixture/add?${params.toString()}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

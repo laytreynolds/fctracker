@@ -14,7 +14,7 @@ import {
   Box,
 } from '@mui/material';
 import type { TPlayer } from '@/types/types';
-import { buildApiUrl } from '@/config/api';
+import { authFetch } from '@/config/api';
 
 export default function PlayerTable({ page, rowsPerPage, onPageChange, onRowsPerPageChange, refreshKey }: {
   page: number;
@@ -31,7 +31,7 @@ export default function PlayerTable({ page, rowsPerPage, onPageChange, onRowsPer
   useEffect(() => {
     setLoading(true);
     setError(null);
-    fetch(buildApiUrl('/api/player'))
+    authFetch('/api/player')
       .then((res) => {
         if (!res.ok) throw new Error('Failed to load players');
         return res.json();

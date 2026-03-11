@@ -1,6 +1,7 @@
 import React from "react"
 import App from "./App"
 import ErrorBoundary from "@/components/ErrorBoundary"
+import { AuthProvider } from "@/context/AuthContext"
 
 import '@fontsource/inter/300.css';
 import '@fontsource/inter/400.css';
@@ -554,7 +555,9 @@ export default function Theme() {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <BrowserRouter>
-          <App darkMode={darkMode} setDarkMode={setDarkMode} />
+          <AuthProvider>
+            <App darkMode={darkMode} setDarkMode={setDarkMode} />
+          </AuthProvider>
         </BrowserRouter>
       </ThemeProvider>
     </ErrorBoundary>

@@ -3,16 +3,16 @@ import { Outlet, Link, useLocation } from 'react-router-dom';
 
 import {
   Box, CssBaseline, AppBar, Toolbar, Typography, IconButton, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText,
-  Divider, Switch, useTheme, useMediaQuery
+  Divider, Switch, useTheme, useMediaQuery, Tooltip
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import HomeIcon from '@mui/icons-material/Home';
 import SportsSoccerIcon from '@mui/icons-material/SportsSoccer';
 import PersonIcon from '@mui/icons-material/Person';
-import Brightness4Icon from '@mui/icons-material/Brightness4';
-import Brightness7Icon from '@mui/icons-material/Brightness7';
 import Groups2Icon from '@mui/icons-material/Groups2';
+import LogoutIcon from '@mui/icons-material/Logout';
 import logo from '@/assets/logo.png';
+import { useAuth } from '@/context/AuthContext';
 
 const drawerWidth = 260;
 
@@ -31,6 +31,7 @@ interface LayoutProps {
 export default function Layout({ darkMode, setDarkMode }: LayoutProps) {
   const theme = useTheme();
   const location = useLocation();
+  const { user, logout } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
   const isMdUp = useMediaQuery(theme.breakpoints.up('md'));
 
@@ -114,6 +115,26 @@ export default function Layout({ darkMode, setDarkMode }: LayoutProps) {
           color="primary"
         />
       </Box>
+      {user && (
+        <>
+          <Divider />
+          <Box sx={{ p: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Box sx={{ overflow: 'hidden' }}>
+              <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.85rem', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+                {user.name}
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.75rem', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+                {user.email}
+              </Typography>
+            </Box>
+            <Tooltip title="Sign out">
+              <IconButton size="small" onClick={logout} sx={{ ml: 1 }}>
+                <LogoutIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          </Box>
+        </>
+      )}
     </Box>
   );
 
@@ -157,9 +178,7 @@ export default function Layout({ darkMode, setDarkMode }: LayoutProps) {
 
           <Box sx={{ flexGrow: 1 }} />
 
-          <IconButton color="inherit" onClick={handleDarkModeToggle} sx={{ mr: 0.5 }}>
-            {darkMode ? <Brightness7Icon fontSize="small" /> : <Brightness4Icon fontSize="small" />}
-          </IconButton>
+         
         </Toolbar>
       </AppBar>
 

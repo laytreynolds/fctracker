@@ -23,7 +23,7 @@ import TrackChangesIcon from '@mui/icons-material/TrackChanges';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import FadeIn from '@/components/FadeIn';
-import { buildApiUrl } from '@/config/api';
+import { authFetch } from '@/config/api';
 import type { TPlayer, TFixture } from '@/types/types';
 
 function StatCard({ label, value, icon, color }: { label: string; value: string | number; icon: React.ReactNode; color: string }) {
@@ -86,11 +86,11 @@ export default function PlayerDetailPage() {
     setError(null);
 
     Promise.all([
-      fetch(buildApiUrl(`/api/player/${id}`)).then((res) => {
+      authFetch(`/api/player/${id}`).then((res) => {
         if (!res.ok) throw new Error('Player not found');
         return res.json();
       }),
-      fetch(buildApiUrl(`/api/player/${id}/fixtures`)).then((res) => {
+      authFetch(`/api/player/${id}/fixtures`).then((res) => {
         if (!res.ok) throw new Error('Failed to load fixtures');
         return res.json();
       }),

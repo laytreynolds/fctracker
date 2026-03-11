@@ -13,7 +13,7 @@ import {
   MenuItem,
 } from '@mui/material';
 import type { TTeam } from '@/types/types';
-import { buildApiUrl } from '@/config/api';
+import { authFetch } from '@/config/api';
 
 interface AddPlayerDialogProps {
   open: boolean;
@@ -33,7 +33,7 @@ export default function AddPlayerDialog({ open, onClose, onSuccess }: AddPlayerD
   useEffect(() => {
     if (!open) return;
     const controller = new AbortController();
-    fetch(buildApiUrl('/api/team/getall'), { signal: controller.signal })
+    authFetch('/api/team/getall', { signal: controller.signal })
       .then(res => res.json())
       .then(data => setTeams(data.teams || []))
       .catch((error) => {
@@ -59,7 +59,7 @@ export default function AddPlayerDialog({ open, onClose, onSuccess }: AddPlayerD
         teamName,
       });
 
-      const response = await fetch(buildApiUrl(`/api/player/add?${params.toString()}`), {
+      const response = await authFetch(`/api/player/add?${params.toString()}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

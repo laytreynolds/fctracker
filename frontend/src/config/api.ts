@@ -19,6 +19,16 @@ export const buildApiUrl = (endpoint: string): string => {
   return `${API_BASE_URL}${endpoint}`;
 };
 
+// Authenticated fetch wrapper — attaches the JWT token from localStorage
+export const authFetch = (endpoint: string, options: RequestInit = {}): Promise<Response> => {
+  const token = localStorage.getItem('fctracker_token');
+  const headers = new Headers(options.headers);
+  if (token) {
+    headers.set('Authorization', `Bearer ${token}`);
+  }
+  return fetch(buildApiUrl(endpoint), { ...options, headers });
+};
+
 // App configuration
 export const APP_CONFIG = {
   name: import.meta.env.VITE_APP_NAME,

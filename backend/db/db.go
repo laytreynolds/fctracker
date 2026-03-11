@@ -8,9 +8,12 @@ import (
 	"os"
 	"strconv"
 
+	"time"
+
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
+	"golang.org/x/crypto/bcrypt"
 )
 
 var (
@@ -23,13 +26,14 @@ const (
 	players  = "players"
 	teams    = "teams"
 	fixtures = "fixtures"
+	users    = "users"
 )
 
 func Connect() {
 
 	uri := os.Getenv("MONGODB_URI")
 
-	// Use the SetServerAPIOptions() method to set the Stable API version to 1
+	// Use the SetServerAPIOptions() method to set the Stable API version to 1"
 	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
 
 	opts := options.Client().
@@ -38,8 +42,8 @@ func Connect() {
 
 	// Create a new client and connect to the server
 	var err error
-	client, err = mongo.Connect(opts)
 
+	client, err = mongo.Connect(opts)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -50,6 +54,78 @@ func Connect() {
 		log.Fatal(err)
 	}
 	fmt.Println("connected to MongoDB...")
+
+	EnsureUserIndexes()
+}
+
+func Stop() {
+	log.Println("Gracefully shutting down MongoDB connection...")
+	err := client.Disconnect(context.TODO())
+	if err != nil {
+		log.Fatal("Failed to disconnect from MongoDB:", err)
+	}
+	log.Println("Disconnected from MongoDB")
+}
+
+func EnsureUserIndexes() {
+	coll := client.Database(db).Collection(users)
+	indexModel := mongo.IndexModel{
+		Keys:    bson.D{{"email", 1}},
+		Options: options.Index().SetUnique(true),
+	}
+	_, err := coll.Indexes().CreateOne(context.TODO(), indexModel)
+	if err != nil {
+		log.Printf("Warning: could not create unique index on users.email: %v", err)
+	}
+}
+
+func CreateUser(email, password, name string) (User, error) {
+	coll := client.Database(db).Collection(users)
+
+	var existing User
+	err := coll.FindOne(context.TODO(), bson.M{"email": email}).Decode(&existing)
+	if err == nil {
+		return User{}, fmt.Errorf("a user with this email already exists")
+	}
+
+	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return User{}, fmt.Errorf("failed to hash password")
+	}
+
+	user := User{
+		Email:    email,
+		Password: string(hash),
+		Name:     name,
+		Created:  time.Now().Format(format),
+	}
+
+	result, err := coll.InsertOne(context.TODO(), user)
+	if err != nil {
+		return User{}, err
+	}
+
+	user.ID = result.InsertedID.(bson.ObjectID)
+	return user, nil
+}
+
+func GetUserByEmail(email string) (User, error) {
+	coll := client.Database(db).Collection(users)
+
+	var user User
+	err := coll.FindOne(context.TODO(), bson.M{"email": email}).Decode(&user)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return User{}, fmt.Errorf("user not found")
+		}
+		return User{}, err
+	}
+	return user, nil
+}
+
+func CheckPassword(hashedPassword, password string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
+	return err == nil
 }
 
 func SeedPlayers() error {

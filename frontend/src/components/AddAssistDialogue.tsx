@@ -11,7 +11,7 @@ import {
   MenuItem,
 } from '@mui/material';
 import type { TPlayer } from '@/types/types';
-import { buildApiUrl } from '@/config/api';
+import { authFetch } from '@/config/api';
 
 export default function AddAssistDialogue({ open, onClose, fixtureId, onSuccess }: {
   open: boolean;
@@ -26,7 +26,7 @@ export default function AddAssistDialogue({ open, onClose, fixtureId, onSuccess 
   useEffect(() => {
     if (!open) return;
     const controller = new AbortController();
-    fetch(buildApiUrl('/api/player'), { signal: controller.signal })
+    authFetch('/api/player', { signal: controller.signal })
       .then(res => res.json())
       .then(data => setPlayers(data.players || []))
       .catch((error) => {
@@ -38,8 +38,8 @@ export default function AddAssistDialogue({ open, onClose, fixtureId, onSuccess 
   const handleSubmit = async (playerId: string) => {
     setSubmitting(true);
     try {
-      const res = await fetch(
-        buildApiUrl(`/api/fixture/addassist?fixtureId=${fixtureId}&playerId=${playerId}`),
+      const res = await authFetch(
+        `/api/fixture/addassist?fixtureId=${fixtureId}&playerId=${playerId}`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
