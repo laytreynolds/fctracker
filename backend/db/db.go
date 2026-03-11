@@ -137,6 +137,92 @@ func GetActivePlayers() ([]Player, error) {
 	return results, nil
 }
 
+func GetPlayerByID(id string) (Player, error) {
+	coll := client.Database(db).Collection(players)
+	objID, err := bson.ObjectIDFromHex(id)
+	if err != nil {
+		return Player{}, err
+	}
+
+	pipeline := mongo.Pipeline{
+		{{"$match", bson.D{{"_id", objID}}}},
+		{{"$lookup", bson.D{
+			{"from", "teams"},
+			{"localField", "team_id"},
+			{"foreignField", "_id"},
+			{"as", "teamDetails"},
+		}}},
+		{{"$unwind", bson.D{
+			{"path", "$teamDetails"},
+			{"preserveNullAndEmptyArrays", true},
+		}}},
+		{{"$addFields", bson.D{
+			{"team_name", "$teamDetails.name"},
+		}}},
+		{{"$project", bson.D{
+			{"teamDetails", 0},
+		}}},
+	}
+
+	cursor, err := coll.Aggregate(context.TODO(), pipeline)
+	if err != nil {
+		return Player{}, err
+	}
+	var results []Player
+	if err = cursor.All(context.TODO(), &results); err != nil {
+		return Player{}, err
+	}
+	if len(results) == 0 {
+		return Player{}, fmt.Errorf("player not found")
+	}
+	return results[0], nil
+}
+
+func GetPlayerFixtures(playerID string) ([]Fixture, error) {
+	coll := client.Database(db).Collection(fixtures)
+	objID, err := bson.ObjectIDFromHex(playerID)
+	if err != nil {
+		return nil, err
+	}
+
+	pipeline := mongo.Pipeline{
+		{{"$match", bson.D{
+			{"$or", bson.A{
+				bson.D{{"goal_scorers", objID}},
+				bson.D{{"assist_scorers", objID}},
+				bson.D{{"man_of_the_match", objID}},
+				bson.D{{"lineup", objID}},
+			}},
+		}}},
+		{{"$lookup", bson.D{
+			{"from", "players"},
+			{"localField", "man_of_the_match"},
+			{"foreignField", "_id"},
+			{"as", "motmDetails"},
+		}}},
+		{{"$addFields", bson.D{
+			{"man_of_the_match_name", bson.D{
+				{"$arrayElemAt", bson.A{"$motmDetails.name", 0}},
+			}},
+		}}},
+		{{"$project", bson.D{
+			{"motmDetails", 0},
+		}}},
+		{{"$sort", bson.D{{"date", -1}}}},
+	}
+
+	cursor, err := coll.Aggregate(context.TODO(), pipeline)
+	if err != nil {
+		return nil, err
+	}
+
+	var results []Fixture
+	if err = cursor.All(context.TODO(), &results); err != nil {
+		return nil, err
+	}
+	return results, nil
+}
+
 func AddPlayer(name, position, fact, age, teamID string) (Player, error) {
 	coll := client.Database(db).Collection(players)
 
