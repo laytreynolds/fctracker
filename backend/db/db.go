@@ -32,18 +32,9 @@ func Connect() {
 	// Use the SetServerAPIOptions() method to set the Stable API version to 1
 	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
 
-	// Configure client options with proper TLS settings for production / development
-	var opts *options.ClientOptions
-	if os.Getenv("GIN_MODE") == "release" {
-		opts = options.Client().
-			ApplyURI(uri).
-			SetServerAPIOptions(serverAPI).
-			SetTLSConfig(nil)
-	} else {
-		opts = options.Client().
-			ApplyURI(uri).
-			SetServerAPIOptions(serverAPI)
-	}
+	opts := options.Client().
+		ApplyURI(uri).
+		SetServerAPIOptions(serverAPI)
 
 	// Create a new client and connect to the server
 	var err error
