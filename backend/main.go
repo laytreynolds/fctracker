@@ -26,8 +26,8 @@ func main() {
 		log.Printf("Error loading .env file: %v", err)
 	}
 
-	go db.Connect()
-	go handler.Start(ctx)
+	db.Connect()
+	handler.Start(ctx)
 
 	<-quit
 	handler.Stop(ctx)
