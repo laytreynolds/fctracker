@@ -19,7 +19,7 @@ const (
 var (
 	router = gin.Default()
 
-	port = "9090"
+	port = os.Getenv("PORT")
 
 	s = &http.Server{
 		Addr:         ":" + port,
