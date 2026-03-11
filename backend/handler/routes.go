@@ -56,6 +56,8 @@ func Start() {
 
 	// Player
 	router.GET("/api/player", getActivePlayers)
+	router.GET("/api/player/:id", getPlayerByID)
+	router.GET("/api/player/:id/fixtures", getPlayerFixtures)
 	router.POST("/api/player/add", addPlayer)
 	router.POST("/api/player/update", updatePlayer)
 	router.DELETE("api/player/delete", deletePlayer)

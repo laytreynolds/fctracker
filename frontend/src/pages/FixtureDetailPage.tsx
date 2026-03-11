@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import {
   Card,
   CardContent,
@@ -24,6 +24,7 @@ import type { TFixture } from '@/types/types';
 
 export default function FixtureDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [fixture, setFixture] = React.useState<TFixture | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
@@ -124,7 +125,13 @@ export default function FixtureDetailPage() {
               <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.secondary' }}>
                 Man of the Match
               </Typography>
-              <Chip label={fixture.ManOfTheMatchName || 'N/A'} color="warning" size="small" />
+              <Chip
+                label={fixture.ManOfTheMatchName || 'N/A'}
+                color="warning"
+                size="small"
+                clickable={!!fixture.ManOfTheMatch}
+                onClick={() => fixture.ManOfTheMatch && navigate(`/player/${fixture.ManOfTheMatch}`)}
+              />
             </Stack>
 
             <Stack direction="row" spacing={1.5} flexWrap="wrap" useFlexGap>
@@ -186,7 +193,14 @@ export default function FixtureDetailPage() {
                 {fixture.GoalScorersNames && fixture.GoalScorersNames.length > 0 ? (
                   <Stack spacing={1} direction="row" flexWrap="wrap" useFlexGap>
                     {fixture.GoalScorersNames.map((name: string, idx: number) => (
-                      <Chip key={idx} label={name} color="success" size="small" />
+                      <Chip
+                        key={idx}
+                        label={name}
+                        color="success"
+                        size="small"
+                        clickable={!!(fixture.GoalScorers && fixture.GoalScorers[idx])}
+                        onClick={() => fixture.GoalScorers?.[idx] && navigate(`/player/${fixture.GoalScorers[idx]}`)}
+                      />
                     ))}
                   </Stack>
                 ) : (
@@ -204,7 +218,14 @@ export default function FixtureDetailPage() {
                 {fixture.AssistScorersNames && fixture.AssistScorersNames.length > 0 ? (
                   <Stack spacing={1} direction="row" flexWrap="wrap" useFlexGap>
                     {fixture.AssistScorersNames.map((name: string, idx: number) => (
-                      <Chip key={idx} label={name} color="info" size="small" />
+                      <Chip
+                        key={idx}
+                        label={name}
+                        color="info"
+                        size="small"
+                        clickable={!!(fixture.AssistScorers && fixture.AssistScorers[idx])}
+                        onClick={() => fixture.AssistScorers?.[idx] && navigate(`/player/${fixture.AssistScorers[idx]}`)}
+                      />
                     ))}
                   </Stack>
                 ) : (
