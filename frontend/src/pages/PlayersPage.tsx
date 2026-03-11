@@ -7,6 +7,7 @@ import {
 } from '@mui/material';
 import AddPlayerDialog from '@/components/AddPlayerDialog';
 import PlayerTable from '@/components/PlayerTable';
+import FadeIn from '@/components/FadeIn';
 
 export default function PlayersPage() {
   const [page, setPage] = useState(0);
@@ -32,20 +33,29 @@ export default function PlayersPage() {
   }, []);
 
   return (
-    <Box sx={{ p: { xs: 1, sm: 2, md: 3 }, maxWidth: 1000, mx: 'auto' }}>
-      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-        <Typography variant="h5">Players</Typography>
-        <Button variant="contained" color="primary" onClick={handleOpen}>
-          Add Player
-        </Button>
-      </Stack>
-      <PlayerTable
-        page={page}
-        rowsPerPage={rowsPerPage}
-        onPageChange={handleChangePage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
-        refreshKey={refreshKey}
+    <Box sx={{ p: { xs: 2, sm: 3, md: 4 }, maxWidth: 1100, mx: 'auto' }}>
+      <FadeIn>
+        <Stack direction="row" justifyContent="space-between" alignItems="flex-end" sx={{ mb: 3, pt: { xs: 2, md: 3 } }}>
+          <Box>
+            <Typography variant="overline" sx={{ color: 'primary.main', mb: 0.5, display: 'block' }}>
+              Squad
+            </Typography>
+            <Typography variant="h3">Players</Typography>
+          </Box>
+          <Button variant="contained" onClick={handleOpen}>
+            Add Player
+          </Button>
+        </Stack>
+      </FadeIn>
+      <FadeIn delay={0.1}>
+        <PlayerTable
+          page={page}
+          rowsPerPage={rowsPerPage}
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+          refreshKey={refreshKey}
         />
+      </FadeIn>
       <AddPlayerDialog open={open} onClose={handleClose} onSuccess={handleSuccess} />
     </Box>
   );
