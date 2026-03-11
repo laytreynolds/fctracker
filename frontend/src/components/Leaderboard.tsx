@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Grid, Card, CardContent, Typography, List, ListItem, Stack, CircularProgress, Box,
 } from '@mui/material';
@@ -15,6 +16,7 @@ const iconColors = {
 };
 
 export default function Leaderboard() {
+  const navigate = useNavigate();
   const [goals, setGoals] = useState<TPlayer[]>([]);
   const [assists, setAssists] = useState<TPlayer[]>([]);
   const [motm, setMotm] = useState<TPlayer[]>([]);
@@ -117,7 +119,11 @@ export default function Leaderboard() {
                       py: 0.75,
                       borderBottom: idx < data.length - 1 ? '1px solid' : 'none',
                       borderColor: 'divider',
+                      cursor: 'pointer',
+                      borderRadius: '6px',
+                      '&:hover': { bgcolor: 'action.hover' },
                     }}
+                    onClick={() => navigate(`/player/${player.ID}`)}
                   >
                     <Stack direction="row" alignItems="center" width="100%">
                       <Typography
@@ -130,7 +136,7 @@ export default function Leaderboard() {
                       >
                         {idx + 1}
                       </Typography>
-                      <Typography sx={{ flexGrow: 1, ml: 1.5, fontWeight: 500, fontSize: '0.925rem' }}>
+                      <Typography sx={{ flexGrow: 1, ml: 1.5, fontWeight: 500, fontSize: '0.925rem', color: 'primary.main' }}>
                         {player.Name}
                       </Typography>
                       <Typography sx={{ fontWeight: 700, color: statColor, fontSize: '0.925rem' }}>

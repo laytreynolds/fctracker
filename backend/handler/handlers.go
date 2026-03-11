@@ -28,6 +28,26 @@ func getActivePlayers(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"players": players, "error": ""})
 }
 
+func getPlayerByID(c *gin.Context) {
+	id := c.Param("id")
+	player, err := db.GetPlayerByID(id)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Player not found"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"player": player})
+}
+
+func getPlayerFixtures(c *gin.Context) {
+	id := c.Param("id")
+	fixtures, err := db.GetPlayerFixtures(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"fixtures": fixtures})
+}
+
 func addPlayer(c *gin.Context) {
 	name := c.Query("name")
 	age := c.Query("age")

@@ -38,8 +38,11 @@ export interface TFixture {
   AwayTeam: string;
   HomeScore: string;
   AwayScore: string;
+  ManOfTheMatch?: string;
   ManOfTheMatchName?: string;
+  GoalScorers?: string[];
   GoalScorersNames?: string[];
+  AssistScorers?: string[];
   AssistScorersNames?: string[];
   Location?: TLocation;
 }

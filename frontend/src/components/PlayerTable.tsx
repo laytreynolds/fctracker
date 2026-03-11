@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Table,
   TableBody,
@@ -22,6 +23,7 @@ export default function PlayerTable({ page, rowsPerPage, onPageChange, onRowsPer
   onRowsPerPageChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   refreshKey: number;
   }) {
+  const navigate = useNavigate();
   const [players, setPlayers] = useState<TPlayer[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -72,8 +74,15 @@ export default function PlayerTable({ page, rowsPerPage, onPageChange, onRowsPer
           </TableHead>
           <TableBody>
             {players.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((player) => (
-              <TableRow key={player.ID}>
-                <TableCell>{player.Name}</TableCell>
+              <TableRow key={player.ID} hover sx={{ cursor: 'pointer' }} onClick={() => navigate(`/player/${player.ID}`)}>
+                <TableCell>
+                  <Typography
+                    component="span"
+                    sx={{ fontWeight: 500, color: 'primary.main', '&:hover': { textDecoration: 'underline' } }}
+                  >
+                    {player.Name}
+                  </Typography>
+                </TableCell>
                 <TableCell>{player.Age}</TableCell>
                 <TableCell>{player.Position}</TableCell>
                 <TableCell>{player.Goals}</TableCell>
