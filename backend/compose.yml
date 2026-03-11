@@ -1,45 +1,23 @@
 name: fctracker
 
 services:
-  mongodb:
-    image: mongo:8
-    container_name: fctracker-mongodb
-    restart: unless-stopped
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME:-admin}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-changeme}
-      MONGO_INITDB_DATABASE: ${MONGO_DATABASE:-fctracker}
-    volumes:
-      - mongodb_data:/data/db
-    networks:
-      - fctracker-backend
-    healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
-
   app:
+    dns:
+    - 8.8.8.8
+    - 8.8.4.4
     container_name: fctracker-backend
     build:
       context: .
       dockerfile: Dockerfile
     environment:
-      PORT: "9090"
-      GIN_MODE: release
-      # Use local MongoDB if MONGODB_URI is not set (e.g. in .env)
-      MONGODB_URI: "mongodb://admin:changeme@mongodb:27017/fctracker?authSource=admin"
+      PORT: ${PORT}
+      GIN_MODE: ${GIN_MODE}
+      MONGODB_URI: "${MONGODB_URI}"
     env_file:
       - .env
     expose:
       - "9090"
-    ports:
-      - "9090:9090"
     restart: unless-stopped
-    depends_on:
-      mongodb:
-        condition: service_healthy
     networks:
       - fctracker-backend
       - proxy_network
@@ -47,8 +25,6 @@ services:
 networks:
   fctracker-backend:
     driver: bridge
+    enable_ipv6: false
   proxy_network:
     external: true
-
-volumes:
-  mongodb_data:

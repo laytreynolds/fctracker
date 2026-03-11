@@ -5,6 +5,9 @@
 # Merges with compose.yml: app stays on backend (for mongodb) and proxy_network (for nginx).
 services:
   app:
+    dns:
+    - 8.8.8.8
+    - 8.8.4.4
     networks:
       - fctracker-backend
       - proxy_network
