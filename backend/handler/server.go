@@ -18,16 +18,7 @@ const (
 
 var (
 	router = gin.Default()
-
-	port = os.Getenv("PORT")
-
-	s = &http.Server{
-		Addr:         ":" + port,
-		Handler:      router,
-		ReadTimeout:  timeout,
-		WriteTimeout: timeout,
-		IdleTimeout:  120 * time.Second,
-	}
+	s      *http.Server
 )
 
 func Start(ctx context.Context) {
@@ -36,6 +27,19 @@ func Start(ctx context.Context) {
 	// Set Gin to release mode in production
 	if os.Getenv("GIN_MODE") == "release" {
 		gin.SetMode(gin.ReleaseMode)
+	}
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	s = &http.Server{
+		Addr:         ":" + port,
+		Handler:      router,
+		ReadTimeout:  timeout,
+		WriteTimeout: timeout,
+		IdleTimeout:  120 * time.Second,
 	}
 
 	allowedOrigins := []string{"http://localhost:5173"}
