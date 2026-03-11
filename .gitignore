@@ -4,3 +4,4 @@ node_modules
 nginx/ssl/
 
 .env.development
+.env

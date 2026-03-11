@@ -13,7 +13,7 @@ import {
   Box,
 } from '@mui/material';
 import type { TTeam } from '@/types/types';
-import { buildApiUrl } from '@/config/api';
+import { authFetch } from '@/config/api';
 
 export default function TeamTable({ page, rowsPerPage, onPageChange, onRowsPerPageChange, refreshKey = 0 }: {
   page: number;
@@ -29,7 +29,7 @@ export default function TeamTable({ page, rowsPerPage, onPageChange, onRowsPerPa
   useEffect(() => {
     setLoading(true);
     setError(null);
-    fetch(buildApiUrl('/api/team/getall'))
+    authFetch('/api/team/getall')
       .then((res) => {
         if (!res.ok) throw new Error('Failed to load teams');
         return res.json();

@@ -10,7 +10,12 @@ import (
 
 // DB initalisation
 func seed(c *gin.Context) {
-	db.SeedPlayers()
+	err := db.SeedPlayers()
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{"mesage": "error seeding players", "error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "players seeded", "error": ""})
 }
 
 // PLayer Handlers
@@ -18,6 +23,7 @@ func getActivePlayers(c *gin.Context) {
 	players, err := db.GetActivePlayers()
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{"mesage": "error getting active players", "error": "no players found"})
+		return
 	}
 
 	if len(players) == 0 {
@@ -176,6 +182,7 @@ func getAllTeams(c *gin.Context) {
 	teams, err := db.GetAllTeams()
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{"mesage": "error getting teams", "error": "no teams found"})
+		return
 	}
 
 	if len(teams) == 0 {
@@ -198,9 +205,9 @@ func addFixture(c *gin.Context) {
 
 	fixture, err := db.AddFixture(date, homeTeam, awayTeam, homeScore, awayScore, manOfMatch, latitude, longitude)
 	if err != nil {
-		if err != nil {
-			c.JSON(http.StatusOK, gin.H{"mesage": "error adding fixture", "error": err})
-		}
+		c.JSON(http.StatusOK, gin.H{"mesage": "error adding fixture", "error": err.Error()})
+		return
+
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "fixture added", "fixture": fixture, "error": ""})
@@ -209,7 +216,8 @@ func addFixture(c *gin.Context) {
 func getFixtures(c *gin.Context) {
 	fixtures, err := db.GetFixtures()
 	if err != nil {
-		c.JSON(http.StatusOK, gin.H{"mesage": "error getting active players", "error": "no players found"})
+		c.JSON(http.StatusOK, gin.H{"mesage": "error getting fixtures", "error": err.Error()})
+		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"fixtures": fixtures, "error": ""})
@@ -231,7 +239,7 @@ func leaderboardGoals(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"players": players})
+	c.JSON(http.StatusOK, gin.H{"players": players, "error": ""})
 }
 
 func leaderboardAssists(c *gin.Context) {
@@ -240,7 +248,7 @@ func leaderboardAssists(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"players": players})
+	c.JSON(http.StatusOK, gin.H{"players": players, "error": ""})
 }
 
 func leaderboardMotm(c *gin.Context) {
@@ -272,7 +280,7 @@ func addGoalscorerToFixture(c *gin.Context) {
 
 	updated, err := db.AddGoalscorerToFixture(fixtureID, playerID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -312,6 +320,9 @@ func addStatToFixture(c *gin.Context) {
 		stat = "goal_scorers"
 	case "assist":
 		stat = "assist_scorers"
+	default:
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid stat"})
+		return
 	}
 
 	updated, err := db.AddStatToFixture(fixtureID, playerID, stat)

@@ -8,7 +8,7 @@ import {
   TextField,
   Stack,
 } from '@mui/material';
-import { buildApiUrl } from '@/config/api';
+import { authFetch } from '@/config/api';
 
 export default function AddTeamDialogue({ open, onClose, onSuccess }: {
   open: boolean;
@@ -35,7 +35,7 @@ export default function AddTeamDialogue({ open, onClose, onSuccess }: {
         founded,
       });
 
-      const response = await fetch(buildApiUrl(`/api/team/add?${params.toString()}`), {
+      const response = await authFetch(`/api/team/add?${params.toString()}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

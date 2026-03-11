@@ -18,7 +18,7 @@ import AddGoalscorerDialogue from '@/components/AddGoalScorerDialogue';
 import AddAssistDialogue from '@/components/AddAssistDialogue';
 import FixtureDetailMap from '@/components/FixtureDetailMap';
 import FadeIn from '@/components/FadeIn';
-import { buildApiUrl } from '@/config/api';
+import { authFetch } from '@/config/api';
 
 import type { TFixture } from '@/types/types';
 
@@ -33,7 +33,7 @@ export default function FixtureDetailPage() {
 
   useEffect(() => {
     if (id) {
-      fetch(buildApiUrl(`/api/fixture/${id}`))
+      authFetch(`/api/fixture/${id}`)
         .then(res => res.json())
         .then(data => {
           if (data.fixture) {
@@ -53,7 +53,7 @@ export default function FixtureDetailPage() {
   const handleAddGoal = () => setAddGoalOpen(true);
   const refreshFixture = () => {
     if (id) {
-      fetch(buildApiUrl(`/api/fixture/${id}`))
+      authFetch(`/api/fixture/${id}`)
         .then(res => res.json())
         .then(data => {
           if (data.fixture) {

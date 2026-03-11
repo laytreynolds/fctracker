@@ -7,7 +7,7 @@ import SportsSoccerIcon from '@mui/icons-material/SportsSoccer';
 import TrackChangesIcon from '@mui/icons-material/TrackChanges';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import type { TPlayer } from '@/types/types';
-import { buildApiUrl } from '@/config/api';
+import { authFetch } from '@/config/api';
 
 const iconColors = {
   goals: '#4ade80',
@@ -27,15 +27,15 @@ export default function Leaderboard() {
     setLoading(true);
     setError(null);
     Promise.all([
-      fetch(buildApiUrl('/api/leaderboard/goals')).then((res) => {
+      authFetch('/api/leaderboard/goals').then((res) => {
         if (!res.ok) throw new Error('Failed to load leaderboard');
         return res.json();
       }),
-      fetch(buildApiUrl('/api/leaderboard/assists')).then((res) => {
+      authFetch('/api/leaderboard/assists').then((res) => {
         if (!res.ok) throw new Error('Failed to load leaderboard');
         return res.json();
       }),
-      fetch(buildApiUrl('/api/leaderboard/motm')).then((res) => {
+      authFetch('/api/leaderboard/motm').then((res) => {
         if (!res.ok) throw new Error('Failed to load leaderboard');
         return res.json();
       }),

@@ -17,7 +17,7 @@ import {
 import type { TFixture } from '@/types/types';
 import AddFixtureDialog from '@/components/AddFixtureDialog';
 import { useNavigate } from 'react-router-dom';
-import { buildApiUrl } from '@/config/api';
+import { authFetch } from '@/config/api';
 
 export default function FixtureTable() {
   const [fixtures, setFixtures] = useState<TFixture[]>([]);
@@ -49,7 +49,7 @@ export default function FixtureTable() {
   useEffect(() => {
     setLoading(true);
     setError(null);
-    fetch(buildApiUrl('/api/fixture/getall'))
+    authFetch('/api/fixture/getall')
       .then((res) => {
         if (!res.ok) throw new Error('Failed to load fixtures');
         return res.json();

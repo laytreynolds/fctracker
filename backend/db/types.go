@@ -10,6 +10,14 @@ const (
 	format = "2006-01-02T15:04:05.000Z"
 )
 
+type User struct {
+	ID        bson.ObjectID `bson:"_id,omitempty" json:"id"`
+	Email     string        `bson:"email" json:"email"`
+	Password  string        `bson:"password" json:"-"`
+	Name      string        `bson:"name" json:"name"`
+	Created   string        `bson:"created" json:"created"`
+}
+
 type Player struct {
 	ID            bson.ObjectID `bson:"_id,omitempty"`
 	Name          string        `bson:"name"`

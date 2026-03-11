@@ -1,3 +1,9 @@
+export interface TUser {
+  id: string;
+  email: string;
+  name: string;
+}
+
 // Player interface (matches backend fields)
 export interface TPlayer {
   ID: string;

@@ -14,7 +14,7 @@ import {
   Box,
 } from '@mui/material';
 import type { TFixture } from '@/types/types';
-import { buildApiUrl } from '@/config/api';
+import { authFetch } from '@/config/api';
 import { useNavigate } from 'react-router-dom';
 
 export default function DashboardFixtureTable({ page, rowsPerPage, onPageChange, onRowsPerPageChange }: {
@@ -31,7 +31,7 @@ export default function DashboardFixtureTable({ page, rowsPerPage, onPageChange,
   useEffect(() => {
     setLoading(true);
     setError(null);
-    fetch(buildApiUrl('/api/leaderboard/fixtures'))
+    authFetch('/api/leaderboard/fixtures')
       .then((res) => {
         if (!res.ok) throw new Error('Failed to load fixtures');
         return res.json();
