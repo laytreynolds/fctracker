@@ -49,6 +49,9 @@ func generateToken(user db.User) (string, error) {
 
 func validateToken(tokenString string) (*Claims, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, jwt.ErrSignatureInvalid
+		}
 		return jwtSecret, nil
 	})
 	if err != nil {
@@ -160,7 +163,7 @@ func register(c *gin.Context) {
 
 	user, err := db.CreateUser(req.Email, req.Password, req.Name)
 	if err != nil {
-		c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
+		c.JSON(http.StatusConflict, gin.H{"error": "Registration failed. This email may already be in use."})
 		return
 	}
 
