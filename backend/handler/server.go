@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"strings"
@@ -18,29 +19,20 @@ const (
 
 var (
 	router = gin.Default()
-	s      *http.Server
-)
 
-func Start(ctx context.Context) {
+	port = "9090"
+	
+	s *http.Server
+	)
+
+func Start() {
 	initJWTSecret()
 
-	// Set Gin to release mode in production
 	if os.Getenv("GIN_MODE") == "release" {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
-
-	s = &http.Server{
-		Addr:         ":" + port,
-		Handler:      router,
-		ReadTimeout:  timeout,
-		WriteTimeout: timeout,
-		IdleTimeout:  120 * time.Second,
-	}
+	
 
 	allowedOrigins := []string{"http://localhost:5173"}
 	if envOrigins := os.Getenv("ALLOWED_ORIGINS"); envOrigins != "" {
@@ -60,6 +52,14 @@ func Start(ctx context.Context) {
 		MaxAge:           12 * time.Hour,
 	}))
 
+	s = &http.Server{
+		Addr:         ":" + port,
+		Handler:      router,
+		ReadTimeout:  timeout,
+		WriteTimeout: timeout,
+		IdleTimeout:  120 * time.Second,
+	}
+		
 	// Health check (public)
 	router.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"status": "healthy"})
@@ -107,17 +107,23 @@ func Start(ctx context.Context) {
 	api.GET("/leaderboard/motm", leaderboardMotm)
 	api.GET("/leaderboard/fixtures", leaderboardFixtures)
 
-	// Start server in a goroutine
+	ln, err := net.Listen("tcp", ":"+port)
+	if err != nil {
+		log.Fatalf("Failed to listen on port %s: %v", port, err)
+	}
+	log.Printf("Server listening on port %s", port)
+	log.Printf("Allowed origins: %v", allowedOrigins)
+
 	go func() {
-		log.Printf("Server starting on port %s", port)
-		log.Printf("Allowed origins: %v", allowedOrigins)
-		if err := s.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		if err := s.Serve(ln); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("Failed to start server: %v", err)
 		}
 	}()
 }
 
-func Stop(ctx context.Context) {
+func Stop() {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 	log.Println("Gracefully shutting down server...")
 	if err := s.Shutdown(ctx); err != nil {
 		log.Fatalf("Failed to shutdown server: %v", err)

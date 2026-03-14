@@ -12,6 +12,7 @@ import PersonIcon from '@mui/icons-material/Person';
 import Groups2Icon from '@mui/icons-material/Groups2';
 import LogoutIcon from '@mui/icons-material/Logout';
 import logo from '@/assets/logo.png';
+import logoDark from '@/assets/logo-dark.png';
 import { useAuth } from '@/context/AuthContext';
 
 const drawerWidth = 260;
@@ -58,7 +59,7 @@ export default function Layout({ darkMode, setDarkMode }: LayoutProps) {
           }}
         >
           <img
-            src={logo}
+            src={darkMode ? logoDark : logo}
             alt="FC Tracker"
             style={{ height: '36px', width: 'auto', objectFit: 'contain' }}
           />
@@ -153,28 +154,26 @@ export default function Layout({ darkMode, setDarkMode }: LayoutProps) {
             </IconButton>
           )}
 
-          {!isMdUp && (
-            <Box
-              component={Link}
-              to="/"
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                textDecoration: 'none',
-                color: 'inherit',
-                gap: 1,
-              }}
-            >
-              <img
-                src={logo}
-                alt="FC Tracker"
-                style={{ height: '32px', width: 'auto', objectFit: 'contain' }}
-              />
-              <Typography variant="h6" sx={{ fontWeight: 800, letterSpacing: '-0.02em' }}>
-                FC TRACKER
-              </Typography>
-            </Box>
-          )}
+          <Box
+            component={Link}
+            to="/"
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              textDecoration: 'none',
+              color: 'inherit',
+              gap: 1,
+            }}
+          >
+            <img
+              src={darkMode ? logoDark : logo}
+              alt="FC Tracker"
+              style={{ height: '32px', width: 'auto', objectFit: 'contain' }}
+            />
+            <Typography variant="h6" sx={{ fontWeight: 800, letterSpacing: '-0.02em' }}>
+              FC TRACKER
+            </Typography>
+          </Box>
 
           <Box sx={{ flexGrow: 1 }} />
 
