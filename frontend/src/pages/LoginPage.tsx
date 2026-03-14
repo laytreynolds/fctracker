@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import {
   Box,
@@ -10,9 +10,12 @@ import {
   Alert,
   Stack,
   CircularProgress,
+  Snackbar,
 } from '@mui/material';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import { useAuth } from '@/context/AuthContext';
+import { buildApiUrl } from '@/config/api';
+
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -20,6 +23,29 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [healthStatus, setHealthStatus] = useState<'idle' | 'checking' | 'up' | 'down'>('idle');
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success');
+
+  const checkBackendHealth = useCallback(async () => {
+    setHealthStatus('checking');
+    try {
+      const response = await fetch(buildApiUrl('/health'));
+      const ok = response.ok;
+      setHealthStatus(ok ? 'up' : 'down');
+      setSnackbarMessage(ok ? 'Backend is up' : 'Backend is down');
+      setSnackbarSeverity(ok ? 'success' : 'error');
+      setSnackbarOpen(true);
+      setTimeout(() => setHealthStatus('idle'), 4000);
+    } catch {
+      setHealthStatus('down');
+      setSnackbarMessage('Backend is down');
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
+      setTimeout(() => setHealthStatus('idle'), 4000);
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,8 +66,56 @@ export default function LoginPage() {
         alignItems: 'center',
         justifyContent: 'center',
         p: 2,
+        position: 'relative',
       }}
     >
+      <Button
+        variant="outlined"
+        size="small"
+        onClick={checkBackendHealth}
+        disabled={healthStatus === 'checking'}
+        aria-label="Check backend health"
+        sx={{
+          position: 'absolute',
+          top: 16,
+          right: 16,
+          textTransform: 'none',
+          borderRadius: 2,
+          ...(healthStatus === 'up' && {
+            borderColor: 'success.main',
+            color: 'success.main',
+          }),
+          ...(healthStatus === 'down' && {
+            borderColor: 'error.main',
+            color: 'error.main',
+          }),
+        }}
+      >
+        {healthStatus === 'checking' && (
+          <CircularProgress size={16} color="inherit" sx={{ mr: 1 }} />
+        )}
+        {healthStatus === 'idle' && 'Check backend health'}
+        {healthStatus === 'checking' && 'Checking...'}
+        {healthStatus === 'up' && 'Backend up'}
+        {healthStatus === 'down' && 'Backend down'}
+      </Button>
+
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={4000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert
+          onClose={() => setSnackbarOpen(false)}
+          severity={snackbarSeverity}
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
+
       <Card sx={{ width: '100%', maxWidth: 420, mx: 'auto' }}>
         <CardContent sx={{ p: { xs: 3, sm: 4 }, '&:last-child': { pb: 4 } }}>
           <Stack alignItems="center" spacing={1.5} sx={{ mb: 3 }}>
